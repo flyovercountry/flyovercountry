@@ -1,0 +1,23 @@
+FROM mcr.microsoft.com/playwright:v1.61.0-noble
+
+WORKDIR /app
+
+# @playwright/test in package.json is pinned to this image's tag.
+# Unprivileged runtime user at the host user's uid/gid (README, Container
+# users); the base image already has a user at uid 1000, so whatever sits
+# at the target ids is removed first.
+ARG DOCKER_UID=1000
+ARG DOCKER_GID=1000
+RUN if [ "${DOCKER_UID}" != "0" ] && getent passwd "${DOCKER_UID}" >/dev/null; then \
+        userdel -r "$(getent passwd "${DOCKER_UID}" | cut -d: -f1)" 2>/dev/null || true; \
+    fi \
+ && if [ "${DOCKER_GID}" != "0" ] && getent group "${DOCKER_GID}" >/dev/null; then \
+        groupdel "$(getent group "${DOCKER_GID}" | cut -d: -f1)" 2>/dev/null || true; \
+    fi \
+ && groupadd -g ${DOCKER_GID} docker \
+ && useradd -u ${DOCKER_UID} -g ${DOCKER_GID} -m docker \
+ && chown -R docker:docker /app
+
+COPY --chown=docker:docker package.json package-lock.json ./
+USER docker
+RUN npm ci --ignore-scripts

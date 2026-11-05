@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# Idempotent build: (re)build a compose service only if its image is missing or
+# the inputs baked into THAT service's image changed since the last build.
+#
+# - Run directly:  ./.rebuild   -> build-if-needed for all services
+# - Sourced:       provides ensure_build() to ./run
+set -euo pipefail
+
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+HASH_DIR="$PROJECT_ROOT/data/build/.build"
+
+# Build args for the images' unprivileged user (README, Container users).
+# The rebuild hash tracks file inputs only: if your uid/gid change, rebuild
+# by hand.
+export DOCKER_UID="$(id -u)" DOCKER_GID="$(id -g)"
+
+# Inputs baked into each image that require a rebuild when they change.
+# `etl` bind-mounts ./backend at runtime (also via PYTHONPATH), so its
+# image does NOT need rebuilding when only that changes.
+# ingest runs the pip-installed copy baked at build time, so for it
+# backend DOES matter. frontend has its own Dockerfile.
+_inputs_for() {
+    case "$1" in
+        wireguard)  echo "backend/network/Dockerfile.wireguard backend/network/wg_entrypoint.sh" ;;
+        etl)        echo "Dockerfile pyproject.toml requirements.lock backend/network/entrypoint.sh" ;;
+        frontend)   echo "Dockerfile.frontend package.json package-lock.json frontend/serve.mjs frontend/entrypoint.sh frontend/copy-data.mjs" ;;
+        playwright) echo "Dockerfile.playwright package.json package-lock.json playwright.config.js" ;;
+        *)          echo "Dockerfile pyproject.toml requirements.lock backend/network/entrypoint.sh backend" ;;
+    esac
+}
+
+_inputs_hash() {
+    cd "$PROJECT_ROOT"
+    # shellcheck disable=SC2046  # intentional word-split of the path list
+    find $(_inputs_for "$1") -type f 2>/dev/null \
+        | sort | xargs sha256sum 2>/dev/null | sha256sum | cut -d' ' -f1
+}
+
+# Compose project name (from `name:` in docker-compose.yml; images are tagged
+# <project>-<service>).
+_project() {
+    awk -F'[: ]+' '/^name:/ {print $2; exit}' "$PROJECT_ROOT/docker-compose.yml"
+}
+
+_image_exists() {
+    docker images -q "$(_project)-$1" 2>/dev/null | grep -q .
+}
+
+ensure_build() {
+    mkdir -p "$HASH_DIR"
+
+    local to_build=()
+    for svc in "$@"; do
+        local current marker
+        current="$(_inputs_hash "$svc")"
+        marker="$HASH_DIR/build-hash-$svc"
+        if ! _image_exists "$svc"; then
+            echo "[build] image for '$svc' missing"
+            to_build+=("$svc")
+        elif [ ! -f "$marker" ] || [ "$(cat "$marker")" != "$current" ]; then
+            echo "[build] build inputs for '$svc' changed"
+            to_build+=("$svc")
+        else
+            echo "[build] up to date: $svc"
+        fi
+    done
+
+    if [ "${#to_build[@]}" -gt 0 ]; then
+        echo "[build] building: ${to_build[*]}"
+        # An explicit branch, because callers run this under `cmd || flag=1`,
+        # which suppresses set -e; the hash must not be written for a build
+        # that failed.
+        if docker compose build "${to_build[@]}"; then
+            for svc in "${to_build[@]}"; do
+                _inputs_hash "$svc" > "$HASH_DIR/build-hash-$svc"
+            done
+        else
+            echo "[build] error: docker compose build failed for: ${to_build[*]}" >&2
+            return 1
+        fi
+    fi
+}
+
+# Executed directly (not sourced): build-if-needed for every service.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    ensure_build wireguard ingest etl frontend playwright
+fi

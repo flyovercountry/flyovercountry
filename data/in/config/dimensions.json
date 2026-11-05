@@ -1,0 +1,10 @@
+{
+  "start": "2026-02-26",
+  "end": "2026-04-16",
+  "whatif_start": "2026-02-28",
+  "bboxes": [
+    {"name": "crop",    "lat_south":  9, "lat_north": 73, "lon_west": -31, "lon_east": 66},
+    {"name": "me",      "lat_south": 10, "lat_north": 38,   "lon_west": 14, "lon_east": 63.5},
+    {"name": "balkans", "lat_south": 38, "lat_north": 44,   "lon_west": 20, "lon_east": 26}
+  ]
+}

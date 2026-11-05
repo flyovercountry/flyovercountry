@@ -1,0 +1,303 @@
+{
+  "_doc": {
+    "headline_shapes": "Each country entry in `countries` carries its headline in one of two shapes, and both are rendered (traced via frontend/src/data.js's mergeFocusConfig and backend/util/focus_config.py's merge_focus_config, kept in sync): (1) a static `headline` string, used verbatim; (2) `headline_name` + `headline_note`, assembled at merge time into the shared headline_intro/{name}/headline_outro template from common.texts.json. A country only needs one of the two shapes, never both — `headline` wins if present, so setting both would silently drop headline_name/headline_note. Interaction-0 countries (UA/BY/RU) carry neither; they have no headline at all.",
+    "permissiveness_levels": "The 3 levels (0-2) are an ORDINAL ENUM of display tiers (map fill colour + legend label) chosen editorially, not a monotone 'how permissive' axis. Strategic-dependence detail (e.g. reliance on a country's bases) lives in each country's own headline/reference text, not in a map tier. Key names are load-bearing (read by index elsewhere) and must not be renamed."
+  },
+  "permissiveness_levels": {
+    "0": {
+      "label": "Blocks most overflight (long-standing)",
+      "color": "#e53935"
+    },
+    "1": {
+      "label": "Acted in 2026 to block some overflight",
+      "color": "#e67d00"
+    },
+    "2": {
+      "label": "Permits most overflight",
+      "color": "#4caf50"
+    }
+  },
+  "countries": {
+    "AT": {
+      "permissiveness": 0,
+      "interaction": 2,
+      "adjective": "Austrian",
+      "ctags": [
+        "Austria",
+        "Osterreich"
+      ],
+      "in_nato": false,
+      "name": "Austria",
+      "headline_name": "Austria",
+      "headline_note": "Refuses US overflights connected to Iran war operations, the defence ministry told APA on 2 April 2026 — but decides case by case, and approved a US transit to Crete the same day."
+    },
+    "BE": {
+      "permissiveness": 1,
+      "interaction": 2,
+      "adjective": "Belgian",
+      "ctags": [
+        "Belgium",
+        "Belgie",
+        "Belgique"
+      ],
+      "in_nato": true,
+      "name": "Belgium",
+      "headline": "Most flights between UK and German airspace visibly route around Belgium through the Netherlands, with the exception of some shorthaul tactical airlift. Belgium appears to already be largely bypassed."
+    },
+    "BG": {
+      "permissiveness": 2,
+      "interaction": 3,
+      "adjective": "Bulgarian",
+      "ctags": [
+        "Bulgaria"
+      ],
+      "in_nato": true,
+      "name": "Bulgaria",
+      "headline_name": "Bulgaria",
+      "headline_note": "Default route to the theater: almost nine in ten flights leaving Europe to the south-east cross Bulgaria."
+    },
+    "CH": {
+      "permissiveness": 0,
+      "interaction": 2,
+      "adjective": "Swiss",
+      "ctags": [
+        "Switzerland",
+        "Schweiz",
+        "Suisse",
+        "Svizzera",
+        "Svizra"
+      ],
+      "in_nato": false,
+      "name": "Switzerland",
+      "headline_name": "Switzerland",
+      "headline_note": "Applies neutrality law case by case: rejected US reconnaissance overflights on 14 March 2026; transport, humanitarian and medical flights permitted."
+    },
+    "CZ": {
+      "permissiveness": 2,
+      "interaction": 3,
+      "adjective": "Czech",
+      "ctags": [
+        "Czechia",
+        "Cesko"
+      ],
+      "in_nato": true,
+      "name": "Czech Republic",
+      "short_name": "Czechia",
+      "headline_name": "the Czech Republic",
+      "headline_note": "On the main route between German bases and the theater (97% of such flights cross it). Not a single point of failure: Poland offers a bypass into Slovakia."
+    },
+    "DE": {
+      "permissiveness": 2,
+      "interaction": 3,
+      "adjective": "German",
+      "ctags": [
+        "Germany",
+        "Deutschland"
+      ],
+      "in_nato": true,
+      "name": "Germany",
+      "headline_name": "Germany",
+      "headline_note": "Ramstein and Spangdahlem are the two US air bases in use; Ramstein hosts USAFE's only airlift wing and, per press, the control hub for US Middle East operations. If Germany denied, US operations would be severely disrupted."
+    },
+    "ES": {
+      "permissiveness": 1,
+      "interaction": 2,
+      "adjective": "Spanish",
+      "ctags": [
+        "Spain",
+        "Espana"
+      ],
+      "in_nato": true,
+      "name": "Spain",
+      "headline_name": "Spain",
+      "headline_note": "Denied US use of Rota, Morón and Spanish airspace for the Iran operation from the war's first day; Robles called the war «profundamente ilegal y profundamente injusta»."
+    },
+    "FR": {
+      "permissiveness": 1,
+      "interaction": 2,
+      "adjective": "French",
+      "ctags": [
+        "France"
+      ],
+      "in_nato": true,
+      "name": "France",
+      "headline_name": "France",
+      "headline_note": "Allowed US non-combat aircraft to land at Istres from 5 March 2026 («Un avion ravitailleur, c'est une station-service, ce n'est pas un avion de chasse» — Vautrin); reportedly refused Israel-bound US weapons transit in late March.\n\nIf countries on the main flight route blocked, France maintaining or tightening its block would become decisive - it is a single point of failure for any European blockade because of its connection to both the Atlantic/North Sea and Mediterranean."
+    },
+    "GB": {
+      "permissiveness": 2,
+      "interaction": 3,
+      "adjective": "British",
+      "ctags": [
+        "UK"
+      ],
+      "in_nato": true,
+      "name": "United Kingdom",
+      "short_name": "the UK",
+      "headline_name": "the UK",
+      "headline_note": "Lakenheath and Mildenhall are major USAF bases; the UK allowed US bombers to strike Iranian missile sites from Fairford (Healey, 9 March 2026). Impact of denial would be large."
+    },
+    "GR": {
+      "permissiveness": 2,
+      "interaction": 3,
+      "adjective": "Greek",
+      "ctags": [
+        "Greece",
+        "Ellada"
+      ],
+      "in_nato": true,
+      "name": "Greece",
+      "headline_name": "Greece",
+      "headline_note": "Souda Bay, Crete, is a key US hub: the US Navy calls its pier the Mediterranean's only military deep-water pier able to berth a US nuclear-powered carrier pierside."
+    },
+    "HR": {
+      "permissiveness": 2,
+      "interaction": 2,
+      "adjective": "Croatian",
+      "ctags": [
+        "Croatia",
+        "Hrvatska"
+      ],
+      "in_nato": true,
+      "name": "Croatia",
+      "headline": "Near-zero overflight due to Swiss, Austrian and Italian restrictions. Could become decisive if Romania, Bulgaria or Greece blocked — transit between Hungary and the Adriatic depends on Slovenia or Croatia. USS Gerald R. Ford stationed off Split for repairs in April 2026, indicating ongoing cooperation."
+    },
+    "HU": {
+      "permissiveness": 2,
+      "interaction": 3,
+      "adjective": "Hungarian",
+      "ctags": [
+        "Hungary",
+        "Magyarorszag"
+      ],
+      "in_nato": true,
+      "name": "Hungary",
+      "headline_name": "Hungary",
+      "headline_note": "Single point of failure on the overland corridor: 98% of flights between Germany and Greece, Bulgaria or Romania cross Hungary, and with Austria and Ukraine closed every overland route runs through Slovakia and Hungary."
+    },
+    "IE": {
+      "permissiveness": 2,
+      "interaction": 3,
+      "adjective": "Irish",
+      "ctags": [
+        "Ireland",
+        "Eire"
+      ],
+      "in_nato": false,
+      "name": "Ireland",
+      "headline": "Most transatlantic US military flights route around Irish airspace. Shannon Airport is used as a transit hub for US military transports."
+    },
+    "IT": {
+      "permissiveness": 1,
+      "interaction": 3,
+      "adjective": "Italian",
+      "ctags": [
+        "Italy",
+        "Italia"
+      ],
+      "in_nato": true,
+      "name": "Italy",
+      "headline_name": "Italy",
+      "headline_note": "Refused some US military flights that fell outside the bilateral base agreements, including at Sigonella; other US flights through Italy continued."
+    },
+    "KW": {
+      "permissiveness": 1,
+      "interaction": 1,
+      "adjective": "Kuwaiti",
+      "ctags": [
+        "Kuwait"
+      ],
+      "in_nato": false,
+      "name": "Kuwait",
+      "headline": "On 5 May 2026, Kuwait told the US alongside Saudi Arabia that it could not use Kuwaiti airspace or bases for a planned offensive. The offensive was immediately halted. Both countries reversed course on 7 May, and within hours the US offensive resumed.\n\nThis episode demonstrates that any state on a major supply route or with basing on which US operations substantially rely can stop or pause the war — not just Gulf states. The reversal also shows the pressure such states face."
+    },
+    "NL": {
+      "permissiveness": 2,
+      "interaction": 3,
+      "adjective": "Dutch",
+      "ctags": [
+        "Netherlands",
+        "Nederland"
+      ],
+      "in_nato": true,
+      "name": "Netherlands",
+      "headline_name": "the Netherlands",
+      "headline_note": "Flights between British and German bases route through the Netherlands rather than straight over Belgium (95% vs 8%); US tankers have been seen holding east of Eindhoven."
+    },
+    "PL": {
+      "permissiveness": 2,
+      "interaction": 3,
+      "adjective": "Polish",
+      "ctags": [
+        "Poland",
+        "Polska"
+      ],
+      "in_nato": true,
+      "name": "Poland",
+      "headline": "Almost no relevant US military flights transit Polish airspace. Poland is a major staging area for NATO operations involving Ukraine, but the main Iran war route goes through the Czech Republic."
+    },
+    "RO": {
+      "permissiveness": 2,
+      "interaction": 3,
+      "adjective": "Romanian",
+      "ctags": [
+        "Romania"
+      ],
+      "in_nato": true,
+      "name": "Romania",
+      "headline_name": "Romania",
+      "headline_note": "Approved on 11 March 2026 a temporary US deployment of aerial-refuelling aircraft and monitoring equipment, described by President Dan as defensive and non-kinetic."
+    },
+    "SA": {
+      "permissiveness": 1,
+      "interaction": 1,
+      "adjective": "Saudi",
+      "ctags": [
+        "SaudiArabia"
+      ],
+      "in_nato": false,
+      "name": "Saudi Arabia",
+      "headline": "On 5 May 2026, Saudi Arabia told the US it could not use Saudi airspace or bases for a planned offensive. The offensive was immediately halted. Saudi Arabia reversed course on 7 May, and within hours the US offensive resumed.\n\nThis episode demonstrates that any state on a major supply route or with basing on which US operations substantially rely can stop or pause the war — not just Gulf states. The reversal also shows the pressure such states face."
+    },
+    "SI": {
+      "permissiveness": 2,
+      "interaction": 2,
+      "adjective": "Slovenian",
+      "ctags": [
+        "Slovenia",
+        "Slovenija"
+      ],
+      "in_nato": true,
+      "name": "Slovenia",
+      "headline": "Virtually no flights* cross Slovenian airspace. Near-zero overflight due to Swiss, Austrian and Italian restrictions. Could become decisive if Romania, Bulgaria or Greece blocked — transit between Hungary and the Adriatic depends on Slovenia or Croatia."
+    },
+    "SK": {
+      "permissiveness": 2,
+      "interaction": 3,
+      "adjective": "Slovak",
+      "ctags": [
+        "Slovakia",
+        "Slovensko"
+      ],
+      "in_nato": true,
+      "name": "Slovakia",
+      "headline_name": "Slovakia",
+      "headline_note": "With Hungary, Slovakia carries every overland route between German and south-eastern airspace while Austria and Ukraine are closed: 97% of flights between Germany and Greece, Bulgaria or Romania cross it."
+    },
+    "BY": {
+      "permissiveness": 0,
+      "interaction": 0,
+      "name": "Belarus"
+    },
+    "RU": {
+      "permissiveness": 0,
+      "interaction": 0,
+      "name": "Russia"
+    },
+    "UA": {
+      "permissiveness": 0,
+      "interaction": 0,
+      "name": "Ukraine"
+    }
+  }
+}

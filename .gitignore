@@ -1,0 +1,65 @@
+# Data — only README.md and .gitkeep are tracked under data/in/external/.
+# All downloaded file contents are ignored (copyright; re-download from
+# URLs documented in data/in/external/README.md).
+data/*
+!data/in/
+data/in/*
+!data/in/config/
+!data/in/config/**
+!data/in/external/
+data/in/external/*
+!data/in/external/README.md
+!data/in/external/*/
+data/in/external/*/*
+!data/in/external/*/README.md
+!data/in/external/*/.gitkeep
+!data/in/external/*/*/
+data/in/external/*/*/*
+!data/in/external/*/*/README.md
+!data/in/external/*/*/.gitkeep
+!data/in/external/*/*/*/
+data/in/external/*/*/*/*
+!data/in/external/*/*/*/README.md
+!data/in/external/*/*/*/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+
+# Frontend build output (data/out/ is already covered by data/* above —
+# the generic build/ rule below matches data/build/, not data/out/; see
+# vite.config.js) and dependencies
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# WireGuard configs
+wg*.conf
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Operator-specific: one-shot server migration script, not part of the repo.
+migrate-server.sh
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+test-results/
+# Manual check that opens a real adsbexchange tab; not part of the suite.
+test/frontend/_manual-realtab-check.spec.js
+

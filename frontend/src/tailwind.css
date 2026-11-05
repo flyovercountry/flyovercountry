@@ -1,0 +1,40 @@
+/* Tailwind v4 — layout layer only.
+ *
+ * Theme tokens and utilities, deliberately WITHOUT preflight: the app's base
+ * styles live in style.css and must not be reset. Utilities land in the
+ * `utilities` cascade layer, so any unlayered rule in style.css still wins
+ * over them — migration therefore means deleting the replaced style.css
+ * rule in the same change, never fighting it with !important.
+ *
+ * Breakpoints are the single source of truth for responsive layout:
+ *   xs 360px  — compact: iPhone SE class, or any phone with Safari page
+ *               zoom / larger text (an SE at 130% lays out at 246px)
+ *   sm 480px  — small phones vs. the rest
+ *   md 900px  — the sheet (phone/tablet) vs. sidebar (desktop) layout;
+ *               lib/layout.js reads --breakpoint-md at runtime, so the JS
+ *               side can never drift from this value
+ *   lg 1100px — toolbar has room to stop wrapping
+ * `@theme static` emits the variables whether or not a utility uses them,
+ * which is what lets layout.js read them. style.css reaches the same
+ * values through `@reference "./tailwind.css"` + `@variant md { ... }`.
+ */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+/* The app's own minimal reset, in the base layer (see reset.css for why). */
+@import "./reset.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+@source "./";
+
+@theme static {
+  --breakpoint-*: initial;
+  --breakpoint-xs: 360px;
+  --breakpoint-sm: 480px;
+  --breakpoint-md: 900px;
+  --breakpoint-lg: 1100px;
+}
+
+/* Phones in landscape. Not a supported layout yet — index.html's
+ * #rotate-overlay covers the viewport there — but the variant exists so the
+ * layout can be designed with that case in mind. Mirrors the media query on
+ * #rotate-overlay in style.css and isLandscapePhone() in lib/layout.js. */
+@custom-variant short (@media (orientation: landscape) and (max-height: 500px) and (pointer: coarse));

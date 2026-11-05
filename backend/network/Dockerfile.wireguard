@@ -1,0 +1,5 @@
+FROM alpine:3.20
+RUN apk add --no-cache wireguard-tools iptables ip6tables bash curl
+COPY backend/network/wg_entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
