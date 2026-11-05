@@ -13,8 +13,7 @@ import {
 
 // Fallback if the config's footer.contact_url is unavailable — same contact
 // form the panel footer uses.
-const FALLBACK_CONTACT_URL =
-  "https://cryptpad.fr/form/#/2/form/view/9rqPIEkeCMj6YcADThr2VIzaRop7Neg7+Zco+6yftKM/embed/";
+const FALLBACK_CONTACT_URL = "mailto:flyover@tuta.io";
 
 function contactUrl() {
   return getFocusConfig()?.footer?.contact_url || FALLBACK_CONTACT_URL;

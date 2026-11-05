@@ -235,6 +235,8 @@ function applyBranding(fc) {
       footerText: fc.footer.text,
       footerContactLabel: fc.footer.contact_label,
       footerTourLabel: fc.footer.tour_label,
+      footerRepoLabel: fc.footer.repo_label,
+      footerRepoUrl: fc.footer.repo_url,
     });
   }
   if (!fc?.title) return;

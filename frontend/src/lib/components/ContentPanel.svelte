@@ -21,7 +21,7 @@
   // URL — the backend's roles_page.py reads the same key. The literal here
   // is only a fallback for a config that predates the key.
   const CONTACT_URL = getFocusConfig()?.footer?.contact_url
-    || 'https://cryptpad.fr/form/#/2/form/view/9rqPIEkeCMj6YcADThr2VIzaRop7Neg7+Zco+6yftKM/embed/';
+    || 'mailto:flyover@tuta.io';
 
   // getFilterPanelProps supplies FilterPanel's props fresh each time the
   // filter view opens (app.js wires controls.getSidebarFilterPanelProps), so
@@ -33,6 +33,7 @@
     onSelectCountry = null, onDeselectCountry = null,
     onEnterRefusal = null, onExitRefusal = null,
     footerText = '', footerContactLabel = '', footerTourLabel = '',
+    footerRepoLabel = '', footerRepoUrl = '',
     getFilterPanelProps = null, onSidebarFoldChange = null,
   } = $props();
 
@@ -424,6 +425,8 @@
           text={footerText}
           contactLabel={footerContactLabel}
           tourLabel={footerTourLabel}
+          repoLabel={footerRepoLabel}
+          repoUrl={footerRepoUrl}
           onContact={handleFooterContact}
           onTour={handleFooterTour} />
       </footer>

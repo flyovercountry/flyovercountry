@@ -4,8 +4,10 @@
   },
   "description": "US military flights over Europe, mapped. See which countries enable which missions.",
   "footer": {
-    "contact_label": "Report an error or comment",
-    "contact_url": "https://cryptpad.fr/form/#/2/form/view/9rqPIEkeCMj6YcADThr2VIzaRop7Neg7+Zco+6yftKM/embed/",
+    "contact_label": "Contact us",
+    "contact_url": "mailto:flyover@tuta.io",
+    "repo_label": "Fork the repo",
+    "repo_url": "https://github.com/flyovercountry/flyovercountry",
     "text": "Explore the data.",
     "tour_label": "Take the tour"
   },

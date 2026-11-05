@@ -5,7 +5,7 @@
   // (common.texts.json footer.text) and can still carry {contact_link}/
   // {tour_link} placeholders for an older config string; the labels for
   // both come from props (contactLabel/tourLabel), not hardcoded text.
-  let { text = '', contactLabel = '', tourLabel = '', onContact = null, onTour = null } = $props();
+  let { text = '', contactLabel = '', tourLabel = '', repoLabel = '', repoUrl = '', onContact = null, onTour = null } = $props();
 
   function handleProseClick(e) {
     // Kept for the contact link if a deployment's footer.text still carries
@@ -37,8 +37,17 @@
       <svg class="footer-action-icon" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
       </svg>
-      <span>{contactLabel || 'Send a correction or comment'}</span>
+      <span>{contactLabel || 'Contact us'}</span>
     </button>
+  {/if}
+  {#if repoUrl}
+    <a href={repoUrl} target="_blank" rel="noopener" class="footer-action">
+      <svg class="footer-action-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M7 5C7 3.89543 7.89543 3 9 3H15C16.1046 3 17 3.89543 17 5V7H19C20.1046 7 21 7.89543 21 9V19C21 20.1046 20.1046 21 19 21H13M7 5V7H5C3.89543 7 3 7.89543 3 9V19C3 20.1046 3.89543 21 5 21H11M7 5H17M17 5V7" />
+        <path d="M8 14l3 3 5-5" />
+      </svg>
+      <span>{repoLabel || 'Fork the repo'}</span>
+    </a>
   {/if}
 </div>
 

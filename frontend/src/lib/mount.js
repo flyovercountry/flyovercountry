@@ -99,6 +99,8 @@ export function mountContentPanel(target, opts = {}) {
     footerText: opts.footerText || '',
     footerContactLabel: opts.footerContactLabel || '',
     footerTourLabel: opts.footerTourLabel || '',
+    footerRepoLabel: opts.footerRepoLabel || '',
+    footerRepoUrl: opts.footerRepoUrl || '',
     getFilterPanelProps: opts.getFilterPanelProps || null,
   });
 }
