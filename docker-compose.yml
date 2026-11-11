@@ -1,0 +1,129 @@
+name: fly
+
+services:
+  wireguard:
+    # The one root container: configuring wg0 needs NET_ADMIN. Its only
+    # mount is the WireGuard config, read-only.
+    build:
+      context: .
+      dockerfile: backend/network/Dockerfile.wireguard
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./data/in/wg:/etc/wireguard:ro
+    environment:
+      # 1 only for the duration of `./run ingest --direct`: the sidecar then
+      # configures no tunnel and ingest egresses with this machine's own
+      # address. Never set this in a .env file.
+      - FLY_NET_DIRECT=${FLY_NET_DIRECT:-0}
+    healthcheck:
+      # Healthy means egress is in the mode the sidecar was started in
+      # (tunneled: wg0 is the default route; direct: marker present and no
+      # wg0 route), not that the tunnel has connectivity.
+      test: ["CMD", "/healthcheck.sh"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  ingest:
+    build:
+      context: .
+      args:
+        DOCKER_UID: "${DOCKER_UID:-1000}"
+        DOCKER_GID: "${DOCKER_GID:-1000}"
+    # Every non-root service runs as `docker`, created at the host user's
+    # uid/gid (build args from .rebuild) so bind-mount writes are host-owned.
+    user: "docker"
+    network_mode: "service:wireguard"
+    depends_on:
+      wireguard:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+    environment:
+      # ingest refuses to run unless it can see it's inside the sidecar's
+      # network namespace (backend/cli.py) — this is the marker it checks.
+      - FLY_TUNNELED=1
+      # Mirrors the sidecar's setting so ingest can print the direct-mode
+      # warning; it grants nothing (the sidecar alone decides the egress).
+      - FLY_NET_DIRECT=${FLY_NET_DIRECT:-0}
+    command: ["run", "ingest"]
+
+  etl:
+    # etl makes no network calls (a test greps for network imports), so it
+    # needs no sidecar.
+    build:
+      context: .
+      args:
+        DOCKER_UID: "${DOCKER_UID:-1000}"
+        DOCKER_GID: "${DOCKER_GID:-1000}"
+    user: "docker"
+    volumes:
+      # etl writes only data/build/ and data/out/; everything else is
+      # read-only, including test/ (pytest must not write to the repo).
+      - ./data/in:/app/data/in:ro
+      - ./data/build:/app/data/build:rw
+      - ./data/out:/app/data/out:rw
+      - ./backend:/app/backend:ro
+      - ./test:/app/test:ro
+      - ./frontend:/app/frontend:ro
+    environment:
+      - PYTHONPATH=/app
+      # Without this, block-buffered output is lost when a stage is killed
+      # (OOM) before the buffer flushes.
+      - PYTHONUNBUFFERED=1
+      # backend/ is read-only, so bytecode is cached in the container's /tmp.
+      - PYTHONPYCACHEPREFIX=/tmp/pycache
+    command: ["run", "etl"]
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        DOCKER_UID: "${DOCKER_UID:-1000}"
+        DOCKER_GID: "${DOCKER_GID:-1000}"
+    user: "docker"
+    ports:
+      - "127.0.0.1:8150:8150"
+    volumes:
+      - ./frontend:/app/frontend
+      - ./package.json:/app/package.json:ro
+      - ./package-lock.json:/app/package-lock.json:ro
+      - ./vite.config.js:/app/vite.config.js:ro
+      - ./svelte.config.js:/app/svelte.config.js:ro
+      # Reads the tracked config (copy-data.mjs), writes the build into
+      # data/out/; no access to data/build/.
+      - ./data/in:/app/data/in:ro
+      - ./data/out:/app/data/out:rw
+    environment:
+      # node_modules/.vite is a root-owned image layer.
+      - VITE_CACHE_DIR=/tmp/vite
+      # Inside the container only; the port mapping above binds 127.0.0.1 on the host.
+      - HOST=0.0.0.0
+    restart: unless-stopped
+
+  playwright:
+    build:
+      context: .
+      dockerfile: Dockerfile.playwright
+      args:
+        DOCKER_UID: "${DOCKER_UID:-1000}"
+        DOCKER_GID: "${DOCKER_GID:-1000}"
+    user: "docker"
+    # Chromium crashes on Docker's default 64 MB /dev/shm; shm_size enlarges
+    # it without joining the host's IPC namespace as `ipc: host` would.
+    shm_size: "1gb"
+    # Reaps zombies from the browser subprocesses.
+    init: true
+    depends_on:
+      - frontend
+    volumes:
+      # The suite writes screenshots into test/frontend/screenshots/.
+      - ./test:/app/test
+      - ./playwright.config.js:/app/playwright.config.js:ro
+      # Build-time helper whose pure functions a spec exercises directly.
+      - ./frontend/apply-links.mjs:/app/frontend/apply-links.mjs:ro
+    environment:
+      - BASE_URL=http://frontend:8150

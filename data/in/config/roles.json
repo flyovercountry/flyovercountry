@@ -1,0 +1,1806 @@
+{
+  "_doc": "Operational-role taxonomy. backend/util/roles.py loads this lazily on first use (not at import), so a late FLY_DATA_DIR is honoured. The frontend gets role/group data from role_catalog.json (fetched at runtime by frontend/src/data.js), which backend/pipeline/etl/publish/export.py builds by reading this file via backend.util.roles.taxonomy(). Adding/changing a designator's role is a JSON edit, not a code change. `groups` is the single source of truth for the published UI group table (order, slug, label, default on-flag, member role slugs); export.py's role_catalog builder reads it via taxonomy()['groups'] rather than defining its own copy. The three pseudo-roles in the 'role_unknown' group (typecode_unknown, type_unknown, role_unknown) are synthetic — they do not appear in the 'roles' map above, only as bucket labels for unresolved aircraft.",
+  "roles": {
+    "strategic_airlift": {
+      "label": "Strategic airlift",
+      "desc": "Long-range high-capacity fixed-wing transport (C-17, C-5)"
+    },
+    "tactical_airlift": {
+      "label": "Tactical airlift",
+      "desc": "Medium-range, austere-field-capable (C-130 family, C-27J)"
+    },
+    "special_ops_lift": {
+      "label": "Special-ops lift",
+      "desc": "MC-130 / SOF infiltration & exfiltration platforms"
+    },
+    "csar": {
+      "label": "Combat search & rescue",
+      "desc": "HC-130J, HH-60; V-22 flies USMC TRAP recovery"
+    },
+    "air_refuelling": {
+      "label": "Air-to-air refuelling",
+      "desc": "KC-135, KC-46, KC-10 / KC-30 MRTT"
+    },
+    "fighter_air_superiority": {
+      "label": "Air-superiority fighter",
+      "desc": "F-22, F-15C — dedicated air-air combat"
+    },
+    "multirole_fighter": {
+      "label": "Multirole fighter",
+      "desc": "F-35, F-16, F/A-18, F-15E — air-to-air + air-to-ground"
+    },
+    "close_air_support": {
+      "label": "Close air support",
+      "desc": "A-10 dedicated CAS"
+    },
+    "bomber": {
+      "label": "Strategic bomber",
+      "desc": "B-1B, B-2A, B-52H — long-range strike"
+    },
+    "gunship": {
+      "label": "Gunship",
+      "desc": "AC-130 ground-attack with side-firing weapons"
+    },
+    "maritime_patrol": {
+      "label": "Maritime patrol / ASW",
+      "desc": "P-8 Poseidon, P-3 Orion (MPA / anti-submarine)"
+    },
+    "awacs": {
+      "label": "AWACS / AEW&C",
+      "desc": "E-3 Sentry, E-7 Wedgetail (airborne surveillance / battle mgmt)"
+    },
+    "sigint_elint": {
+      "label": "SIGINT / ELINT / EW",
+      "desc": "RC-135, EA-37B Compass Call, RC-26, ISR Gulfstreams (collection + electronic attack)"
+    },
+    "ground_surveillance": {
+      "label": "Ground/sea surveillance",
+      "desc": "E-8 J-STARS (retired 2023); E-9A Widget range surveillance"
+    },
+    "command_relay": {
+      "label": "Command / comms relay",
+      "desc": "E-6 Mercury TACAMO; E-11A BACN battlefield relay"
+    },
+    "strategic_recon": {
+      "label": "Strategic recon",
+      "desc": "U-2S Dragon Lady high-altitude reconnaissance"
+    },
+    "uav_isr": {
+      "label": "UAV ISR",
+      "desc": "MQ-9 Reaper, RQ-4 Global Hawk, MQ-4 Triton (unmanned reconnaissance)"
+    },
+    "rotary_lift": {
+      "label": "Rotary lift",
+      "desc": "UH-60 / MH-60 / CH-47 / CH-53 — utility & heavy-lift helicopters"
+    },
+    "rotary_attack": {
+      "label": "Attack helicopter",
+      "desc": "AH-64 Apache, AH-1 Cobra/Viper"
+    },
+    "tilt_rotor": {
+      "label": "Tilt-rotor lift",
+      "desc": "V-22 Osprey — operationally helicopter-like, fixed-wing speed"
+    },
+    "vip_executive": {
+      "label": "VIP / executive",
+      "desc": "VC-25, C-32, C-37, C-40 — government / state lift"
+    },
+    "trainer_primary": {
+      "label": "Primary trainer",
+      "desc": "T-6 Texan II and light pistons used for screening/training"
+    },
+    "trainer_advanced": {
+      "label": "Advanced trainer",
+      "desc": "T-38 Talon, T-45, T-1 Jayhawk (retired 2025), BAE Hawk"
+    },
+    "utility_light": {
+      "label": "Light utility",
+      "desc": "Beech King Air variants (BE20, C-12), small twin turboprops"
+    },
+    "civil_cargo": {
+      "label": "Civil transport (CRAF)",
+      "desc": "Civil Reserve Air Fleet airliners & freighters (747F/777F/MD-11F, passenger 737/757/767)"
+    },
+    "non_aircraft": {
+      "label": "Non-aircraft",
+      "desc": "Ground-test transponders (TWR), balloons, free-flight objects"
+    }
+  },
+  "groups": [
+    {
+      "slug": "airlift",
+      "label": "Airlift",
+      "on": true,
+      "roles": [
+        "strategic_airlift",
+        "tactical_airlift",
+        "special_ops_lift",
+        "csar"
+      ]
+    },
+    {
+      "slug": "refuelling",
+      "label": "Refuelling",
+      "on": true,
+      "roles": [
+        "air_refuelling"
+      ]
+    },
+    {
+      "slug": "combat",
+      "label": "Combat",
+      "on": true,
+      "roles": [
+        "fighter_air_superiority",
+        "multirole_fighter",
+        "close_air_support",
+        "bomber",
+        "gunship"
+      ]
+    },
+    {
+      "slug": "isr",
+      "label": "ISR",
+      "on": true,
+      "roles": [
+        "maritime_patrol",
+        "awacs",
+        "sigint_elint",
+        "ground_surveillance",
+        "command_relay",
+        "strategic_recon",
+        "uav_isr"
+      ]
+    },
+    {
+      "slug": "other_roles",
+      "label": "Other roles",
+      "on": false,
+      "roles": [
+        "trainer_primary",
+        "trainer_advanced",
+        "vip_executive",
+        "utility_light",
+        "civil_cargo"
+      ]
+    },
+    {
+      "slug": "role_unknown",
+      "label": "Role unknown",
+      "on": true,
+      "roles": [
+        "typecode_unknown",
+        "type_unknown",
+        "role_unknown"
+      ]
+    }
+  ],
+  "designators": {
+    "C17": {
+      "label": "C-17 Globemaster III",
+      "roles": [
+        "strategic_airlift"
+      ]
+    },
+    "C5": {
+      "label": "C-5 Galaxy",
+      "roles": [
+        "strategic_airlift"
+      ]
+    },
+    "C5M": {
+      "label": "C-5M Super Galaxy",
+      "roles": [
+        "strategic_airlift"
+      ]
+    },
+    "C30J": {
+      "label": "Lockheed C-130J family",
+      "roles": [
+        "tactical_airlift",
+        "air_refuelling",
+        "special_ops_lift",
+        "gunship",
+        "csar",
+        "sigint_elint",
+        "maritime_patrol"
+      ],
+      "desc_roles": [
+        [
+          "KC-130",
+          [
+            "air_refuelling"
+          ]
+        ],
+        [
+          "MC-130",
+          [
+            "special_ops_lift"
+          ]
+        ],
+        [
+          "HC-130",
+          [
+            "csar"
+          ]
+        ],
+        [
+          "AC-130",
+          [
+            "gunship"
+          ]
+        ],
+        [
+          "EC-130",
+          [
+            "sigint_elint"
+          ]
+        ],
+        [
+          "WC-130",
+          [
+            "tactical_airlift"
+          ]
+        ],
+        [
+          "C-130",
+          [
+            "tactical_airlift"
+          ]
+        ]
+      ]
+    },
+    "C130": {
+      "label": "Lockheed C-130 (legacy H/E)",
+      "roles": [
+        "tactical_airlift",
+        "air_refuelling",
+        "special_ops_lift",
+        "gunship",
+        "csar",
+        "sigint_elint",
+        "maritime_patrol",
+        "vip_executive"
+      ],
+      "desc_roles": [
+        [
+          "KC-130",
+          [
+            "air_refuelling"
+          ]
+        ],
+        [
+          "LC-130",
+          [
+            "tactical_airlift"
+          ]
+        ],
+        [
+          "C-130",
+          [
+            "tactical_airlift"
+          ]
+        ]
+      ]
+    },
+    "C160": {
+      "label": "Transall C-160",
+      "roles": [
+        "tactical_airlift"
+      ]
+    },
+    "C27J": {
+      "label": "C-27J Spartan",
+      "roles": [
+        "tactical_airlift",
+        "csar",
+        "special_ops_lift",
+        "maritime_patrol"
+      ],
+      "desc_roles": [
+        [
+          "HC-27",
+          [
+            "csar"
+          ]
+        ],
+        [
+          "C-27",
+          [
+            "tactical_airlift"
+          ]
+        ]
+      ]
+    },
+    "CN35": {
+      "label": "CASA CN-235 / HC-144",
+      "roles": [
+        "tactical_airlift",
+        "csar",
+        "maritime_patrol"
+      ],
+      "desc_roles": [
+        [
+          "HC-144",
+          [
+            "maritime_patrol"
+          ]
+        ],
+        [
+          "CN-235",
+          [
+            "tactical_airlift"
+          ]
+        ]
+      ]
+    },
+    "C295": {
+      "label": "C-295",
+      "roles": [
+        "tactical_airlift"
+      ]
+    },
+    "C2": {
+      "label": "C-2A Greyhound",
+      "roles": [
+        "tactical_airlift"
+      ]
+    },
+    "C212": {
+      "label": "CASA C-212 Aviocar",
+      "roles": [
+        "tactical_airlift"
+      ]
+    },
+    "K35R": {
+      "label": "KC-135R Stratotanker",
+      "roles": [
+        "air_refuelling"
+      ]
+    },
+    "K35E": {
+      "label": "KC-135E",
+      "roles": [
+        "air_refuelling"
+      ]
+    },
+    "KC46": {
+      "label": "KC-46 Pegasus",
+      "roles": [
+        "air_refuelling"
+      ]
+    },
+    "C135": {
+      "label": "C-135 Stratolifter",
+      "roles": [
+        "air_refuelling",
+        "utility_light"
+      ],
+      "desc_roles": [
+        [
+          "TC-135",
+          [
+            "utility_light"
+          ]
+        ],
+        [
+          "NC-135",
+          [
+            "utility_light"
+          ]
+        ]
+      ]
+    },
+    "F35": {
+      "label": "F-35 Lightning II",
+      "roles": [
+        "multirole_fighter"
+      ]
+    },
+    "F22": {
+      "label": "F-22 Raptor",
+      "roles": [
+        "fighter_air_superiority"
+      ]
+    },
+    "F16": {
+      "label": "F-16 Fighting Falcon",
+      "roles": [
+        "multirole_fighter"
+      ]
+    },
+    "F15": {
+      "label": "F-15 Eagle / Strike Eagle",
+      "roles": [
+        "fighter_air_superiority",
+        "multirole_fighter"
+      ],
+      "desc_roles": [
+        [
+          "F-15E",
+          [
+            "multirole_fighter"
+          ]
+        ],
+        [
+          "STRIKE EAGLE",
+          [
+            "multirole_fighter"
+          ]
+        ],
+        [
+          "F-15",
+          [
+            "fighter_air_superiority"
+          ]
+        ]
+      ]
+    },
+    "F18": {
+      "label": "F/A-18 Hornet / Super Hornet",
+      "roles": [
+        "multirole_fighter"
+      ]
+    },
+    "F18S": {
+      "label": "F/A-18E/F Super Hornet / EA-18G",
+      "roles": [
+        "multirole_fighter",
+        "sigint_elint"
+      ],
+      "desc_roles": [
+        [
+          "EA-18",
+          [
+            "sigint_elint"
+          ]
+        ],
+        [
+          "F/A-18",
+          [
+            "multirole_fighter"
+          ]
+        ],
+        [
+          "FA-18",
+          [
+            "multirole_fighter"
+          ]
+        ]
+      ]
+    },
+    "F18H": {
+      "label": "F/A-18A-D Hornet",
+      "roles": [
+        "multirole_fighter"
+      ]
+    },
+    "F14": {
+      "label": "F-14 Tomcat (retired)",
+      "roles": [
+        "fighter_air_superiority"
+      ]
+    },
+    "F4": {
+      "label": "F-4 Phantom II (retired)",
+      "roles": [
+        "multirole_fighter",
+        "strategic_recon"
+      ]
+    },
+    "F5": {
+      "label": "F-5 Tiger II",
+      "roles": [
+        "multirole_fighter",
+        "strategic_recon"
+      ]
+    },
+    "A10": {
+      "label": "A-10 Thunderbolt II",
+      "roles": [
+        "close_air_support"
+      ]
+    },
+    "HAR": {
+      "label": "AV-8 Harrier family",
+      "roles": [
+        "close_air_support",
+        "multirole_fighter"
+      ]
+    },
+    "B1": {
+      "label": "B-1B Lancer",
+      "roles": [
+        "bomber"
+      ]
+    },
+    "B2": {
+      "label": "B-2 Spirit",
+      "roles": [
+        "bomber"
+      ]
+    },
+    "B52": {
+      "label": "B-52 Stratofortress",
+      "roles": [
+        "bomber"
+      ]
+    },
+    "B21": {
+      "label": "B-21 Raider",
+      "roles": [
+        "bomber"
+      ]
+    },
+    "P8": {
+      "label": "P-8A Poseidon",
+      "roles": [
+        "maritime_patrol"
+      ]
+    },
+    "P3": {
+      "label": "P-3 Orion",
+      "roles": [
+        "maritime_patrol",
+        "sigint_elint",
+        "utility_light"
+      ],
+      "desc_roles": [
+        [
+          "NP-3",
+          [
+            "utility_light"
+          ]
+        ],
+        [
+          "WP-3",
+          [
+            "utility_light"
+          ]
+        ],
+        [
+          "P-3",
+          [
+            "maritime_patrol"
+          ]
+        ],
+        [
+          "P3",
+          [
+            "maritime_patrol"
+          ]
+        ]
+      ]
+    },
+    "E2": {
+      "label": "E-2 Hawkeye",
+      "roles": [
+        "awacs"
+      ]
+    },
+    "E3CF": {
+      "label": "E-3 Sentry",
+      "roles": [
+        "awacs"
+      ]
+    },
+    "E3TF": {
+      "label": "E-3 Sentry",
+      "roles": [
+        "awacs"
+      ]
+    },
+    "E737": {
+      "label": "E-737 (AEW&C)",
+      "roles": [
+        "awacs"
+      ]
+    },
+    "E6": {
+      "label": "E-6 Mercury",
+      "roles": [
+        "command_relay"
+      ]
+    },
+    "E8": {
+      "label": "E-8 J-STARS",
+      "roles": [
+        "ground_surveillance"
+      ]
+    },
+    "R135": {
+      "label": "RC-135 (variant)",
+      "roles": [
+        "sigint_elint"
+      ]
+    },
+    "W135": {
+      "label": "WC-135 Constant Phoenix (nuclear sampling)",
+      "roles": [
+        "strategic_recon"
+      ]
+    },
+    "U2": {
+      "label": "U-2S Dragon Lady",
+      "roles": [
+        "strategic_recon",
+        "sigint_elint"
+      ]
+    },
+    "TR1": {
+      "label": "TR-1 (U-2 variant)",
+      "roles": [
+        "strategic_recon"
+      ]
+    },
+    "Q4": {
+      "label": "RQ-4 Global Hawk",
+      "roles": [
+        "uav_isr"
+      ]
+    },
+    "Q9": {
+      "label": "MQ-9 Reaper",
+      "roles": [
+        "uav_isr"
+      ]
+    },
+    "Q1": {
+      "label": "MQ-1 Predator",
+      "roles": [
+        "uav_isr"
+      ]
+    },
+    "DRON": {
+      "label": "Drone (generic)",
+      "roles": [
+        "uav_isr"
+      ]
+    },
+    "GLF5": {
+      "label": "Gulfstream G550 / C-37B / EA-37B",
+      "roles": [
+        "vip_executive",
+        "sigint_elint"
+      ],
+      "desc_roles": [
+        [
+          "EA-37",
+          [
+            "sigint_elint"
+          ]
+        ],
+        [
+          "C-37",
+          [
+            "vip_executive"
+          ]
+        ]
+      ]
+    },
+    "GLF6": {
+      "label": "Gulfstream G650",
+      "roles": [
+        "vip_executive"
+      ]
+    },
+    "GLF4": {
+      "label": "Gulfstream G450/G400",
+      "roles": [
+        "vip_executive"
+      ]
+    },
+    "GLF3": {
+      "label": "Gulfstream III",
+      "roles": [
+        "vip_executive"
+      ]
+    },
+    "G150": {
+      "label": "Gulfstream G150",
+      "roles": [
+        "vip_executive"
+      ]
+    },
+    "G200": {
+      "label": "Gulfstream G200",
+      "roles": [
+        "vip_executive"
+      ]
+    },
+    "G280": {
+      "label": "Gulfstream G280",
+      "roles": [
+        "vip_executive"
+      ]
+    },
+    "GLEX": {
+      "label": "Bombardier Global Express / E-11A",
+      "roles": [
+        "vip_executive",
+        "command_relay"
+      ],
+      "desc_roles": [
+        [
+          "E-11",
+          [
+            "command_relay"
+          ]
+        ]
+      ]
+    },
+    "CL30": {
+      "label": "Bombardier Challenger 300",
+      "roles": [
+        "vip_executive"
+      ]
+    },
+    "CL60": {
+      "label": "Bombardier Challenger 600 series",
+      "roles": [
+        "vip_executive"
+      ]
+    },
+    "ASTR": {
+      "label": "IAI Astra / Gulfstream G100",
+      "roles": [
+        "vip_executive"
+      ]
+    },
+    "FA10": {
+      "label": "Dassault Falcon 10",
+      "roles": [
+        "vip_executive"
+      ]
+    },
+    "FA20": {
+      "label": "Dassault Falcon 20 / HU-25 Guardian",
+      "roles": [
+        "vip_executive",
+        "csar"
+      ]
+    },
+    "FA50": {
+      "label": "Dassault Falcon 50",
+      "roles": [
+        "vip_executive"
+      ]
+    },
+    "FA7X": {
+      "label": "Dassault Falcon 7X",
+      "roles": [
+        "vip_executive"
+      ]
+    },
+    "LJ35": {
+      "label": "Learjet 35 (C-21)",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "LJ60": {
+      "label": "Learjet 60",
+      "roles": [
+        "vip_executive"
+      ]
+    },
+    "T6": {
+      "label": "T-6 Texan/Harvard (warbird; Texan II = TEX2)",
+      "roles": [
+        "trainer_primary"
+      ]
+    },
+    "TEX2": {
+      "label": "T-6 Texan II / AT-6 Wolverine",
+      "roles": [
+        "trainer_primary",
+        "close_air_support"
+      ]
+    },
+    "T1": {
+      "label": "T-1A Jayhawk (registry shorthand; ICAO T1 = Fuji T-1)",
+      "roles": [
+        "trainer_advanced",
+        "utility_light"
+      ]
+    },
+    "T34T": {
+      "label": "T-34 Turbo Mentor",
+      "roles": [
+        "trainer_primary"
+      ]
+    },
+    "T38": {
+      "label": "T-38 Talon",
+      "roles": [
+        "trainer_advanced"
+      ]
+    },
+    "HAWK": {
+      "label": "BAE Hawk / T-45 Goshawk",
+      "roles": [
+        "trainer_advanced"
+      ]
+    },
+    "TUCA": {
+      "label": "EMB-312 Tucano",
+      "roles": [
+        "trainer_primary"
+      ]
+    },
+    "C150": {
+      "label": "Cessna 150",
+      "roles": [
+        "trainer_primary"
+      ]
+    },
+    "C172": {
+      "label": "Cessna 172",
+      "roles": [
+        "trainer_primary"
+      ]
+    },
+    "DA40": {
+      "label": "Diamond DA40",
+      "roles": [
+        "trainer_primary"
+      ]
+    },
+    "P28A": {
+      "label": "Piper PA-28 Cherokee",
+      "roles": [
+        "trainer_primary"
+      ]
+    },
+    "P28R": {
+      "label": "Piper PA-28R Arrow",
+      "roles": [
+        "trainer_primary"
+      ]
+    },
+    "SR20": {
+      "label": "Cirrus SR20",
+      "roles": [
+        "trainer_primary"
+      ]
+    },
+    "RV12": {
+      "label": "Van's RV-12",
+      "roles": [
+        "trainer_primary"
+      ]
+    },
+    "BE20": {
+      "label": "Beech King Air 200 / C-12 / RC-12",
+      "roles": [
+        "utility_light",
+        "sigint_elint",
+        "maritime_patrol"
+      ],
+      "desc_roles": [
+        [
+          "RC-12",
+          [
+            "sigint_elint"
+          ]
+        ],
+        [
+          "UC-12",
+          [
+            "utility_light"
+          ]
+        ],
+        [
+          "C-12",
+          [
+            "utility_light"
+          ]
+        ],
+        [
+          "KING AIR",
+          [
+            "utility_light"
+          ]
+        ]
+      ]
+    },
+    "BE40": {
+      "label": "Beech 400 / T-1 Jayhawk",
+      "roles": [
+        "utility_light",
+        "trainer_advanced"
+      ],
+      "desc_roles": [
+        [
+          "T-1",
+          [
+            "trainer_advanced"
+          ]
+        ]
+      ]
+    },
+    "BE50": {
+      "label": "Beech 50 Twin Bonanza / U-8/RU-8 Seminole",
+      "roles": [
+        "utility_light",
+        "sigint_elint"
+      ]
+    },
+    "BE55": {
+      "label": "Beech Baron 55 / T-42 Cochise",
+      "roles": [
+        "utility_light",
+        "trainer_advanced"
+      ]
+    },
+    "BE10": {
+      "label": "Beech King Air 100",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "BE30": {
+      "label": "Beech King Air 300",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "BE9L": {
+      "label": "Beech King Air 90 / T-44 Pegasus",
+      "roles": [
+        "utility_light",
+        "trainer_advanced"
+      ],
+      "desc_roles": [
+        [
+          "T-44",
+          [
+            "trainer_advanced"
+          ]
+        ],
+        [
+          "KING AIR",
+          [
+            "utility_light"
+          ]
+        ]
+      ]
+    },
+    "B190": {
+      "label": "Beech 1900",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "B350": {
+      "label": "Beech King Air 350 / MC-12W",
+      "roles": [
+        "utility_light",
+        "sigint_elint",
+        "maritime_patrol"
+      ],
+      "desc_roles": [
+        [
+          "MC-12",
+          [
+            "sigint_elint"
+          ]
+        ],
+        [
+          "UC-12",
+          [
+            "utility_light"
+          ]
+        ]
+      ]
+    },
+    "U21": {
+      "label": "U-21/RU-21 Ute",
+      "roles": [
+        "utility_light",
+        "sigint_elint"
+      ]
+    },
+    "M28": {
+      "label": "PZL M28 / C-145A Skytruck",
+      "roles": [
+        "utility_light",
+        "special_ops_lift"
+      ]
+    },
+    "DHC6": {
+      "label": "DHC-6 Twin Otter",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "DHC2": {
+      "label": "DHC-2 Beaver",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "DH8A": {
+      "label": "DHC-8-100 / E-9A Widget",
+      "roles": [
+        "utility_light",
+        "ground_surveillance"
+      ]
+    },
+    "DH8B": {
+      "label": "DHC-8-200 / P-9A",
+      "roles": [
+        "utility_light",
+        "maritime_patrol"
+      ]
+    },
+    "DH8C": {
+      "label": "DHC-8-300 (incl. maritime surveillance)",
+      "roles": [
+        "utility_light",
+        "maritime_patrol"
+      ]
+    },
+    "PC12": {
+      "label": "Pilatus PC-12 / U-28A Draco",
+      "roles": [
+        "utility_light",
+        "special_ops_lift",
+        "sigint_elint"
+      ],
+      "desc_roles": [
+        [
+          "U-28",
+          [
+            "special_ops_lift"
+          ]
+        ],
+        [
+          "PC-12",
+          [
+            "utility_light"
+          ]
+        ]
+      ]
+    },
+    "C25A": {
+      "label": "Cessna Citation CJ2",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "C25B": {
+      "label": "Cessna Citation CJ3",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "C25C": {
+      "label": "Cessna Citation CJ4",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "C560": {
+      "label": "Cessna Citation V/Ultra",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "C56X": {
+      "label": "Cessna Citation XLS",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "C182": {
+      "label": "Cessna 182",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "C208": {
+      "label": "Cessna 208 Caravan",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "T206": {
+      "label": "Cessna T206 Stationair",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "PA31": {
+      "label": "Piper PA-31 Navajo",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "D328": {
+      "label": "Dornier 328 / C-146A Wolfhound",
+      "roles": [
+        "utility_light",
+        "special_ops_lift"
+      ],
+      "desc_roles": [
+        [
+          "C-146",
+          [
+            "special_ops_lift"
+          ]
+        ]
+      ]
+    },
+    "E135": {
+      "label": "Embraer ERJ 135",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "E145": {
+      "label": "Embraer ERJ 145",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "E190": {
+      "label": "Embraer E190",
+      "roles": [
+        "civil_cargo"
+      ]
+    },
+    "P180": {
+      "label": "Piaggio P180 Avanti",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "SW4": {
+      "label": "Fairchild Metro / C-26 / RC-26",
+      "roles": [
+        "utility_light",
+        "sigint_elint"
+      ],
+      "desc_roles": [
+        [
+          "RC-26",
+          [
+            "sigint_elint"
+          ]
+        ],
+        [
+          "C-26",
+          [
+            "utility_light"
+          ]
+        ]
+      ]
+    },
+    "TBM7": {
+      "label": "Daher TBM 700",
+      "roles": [
+        "utility_light"
+      ]
+    },
+    "AT8T": {
+      "label": "Air Tractor AT-802 / OA-1K Skyraider II",
+      "roles": [
+        "utility_light",
+        "close_air_support"
+      ]
+    },
+    "MRF1": {
+      "label": "Dassault Mirage F1",
+      "roles": [
+        "multirole_fighter"
+      ]
+    },
+    "GA7C": {
+      "label": "Gulfstream G700",
+      "roles": [
+        "vip_executive"
+      ]
+    },
+    "BT7": {
+      "label": "T-7A Red Hawk",
+      "roles": [
+        "trainer_advanced"
+      ]
+    },
+    "DG1T": {
+      "label": "DG-1000T motorglider",
+      "roles": [
+        "trainer_primary"
+      ]
+    },
+    "DISC": {
+      "label": "Schempp-Hirth Discus",
+      "roles": [
+        "trainer_primary"
+      ]
+    },
+    "DUOD": {
+      "label": "Schempp-Hirth Duo Discus",
+      "roles": [
+        "trainer_primary"
+      ]
+    },
+    "GLID": {
+      "label": "Glider (generic)",
+      "roles": [
+        "trainer_primary"
+      ]
+    },
+    "BALL": {
+      "label": "Balloon",
+      "roles": [
+        "non_aircraft"
+      ]
+    },
+    "FFLO": {
+      "label": "Free-flight object",
+      "roles": [
+        "non_aircraft"
+      ]
+    },
+    "TWR": {
+      "label": "Ground station",
+      "roles": [
+        "non_aircraft"
+      ]
+    },
+    "B744": {
+      "label": "Boeing 747-400F",
+      "roles": [
+        "civil_cargo"
+      ]
+    },
+    "B748": {
+      "label": "Boeing 747-8 / VC-25B",
+      "roles": [
+        "civil_cargo",
+        "vip_executive"
+      ]
+    },
+    "B741": {
+      "label": "Boeing 747-100",
+      "roles": [
+        "civil_cargo"
+      ]
+    },
+    "B742": {
+      "label": "Boeing 747-200 / VC-25A / E-4B",
+      "roles": [
+        "civil_cargo",
+        "vip_executive",
+        "command_relay"
+      ],
+      "desc_roles": [
+        [
+          "E-4B",
+          [
+            "command_relay"
+          ]
+        ],
+        [
+          "VC-25",
+          [
+            "vip_executive"
+          ]
+        ],
+        [
+          "747",
+          [
+            "civil_cargo"
+          ]
+        ]
+      ]
+    },
+    "BLCF": {
+      "label": "Boeing 747 Dreamlifter",
+      "roles": [
+        "civil_cargo"
+      ]
+    },
+    "B772": {
+      "label": "Boeing 777-200",
+      "roles": [
+        "civil_cargo"
+      ]
+    },
+    "B77L": {
+      "label": "Boeing 777-200LR",
+      "roles": [
+        "civil_cargo"
+      ]
+    },
+    "B77W": {
+      "label": "Boeing 777-300ER",
+      "roles": [
+        "civil_cargo"
+      ]
+    },
+    "B752": {
+      "label": "Boeing 757-200",
+      "roles": [
+        "civil_cargo",
+        "vip_executive"
+      ],
+      "desc_roles": [
+        [
+          "C-32",
+          [
+            "vip_executive"
+          ]
+        ],
+        [
+          "757",
+          [
+            "civil_cargo"
+          ]
+        ]
+      ]
+    },
+    "B753": {
+      "label": "Boeing 757-300",
+      "roles": [
+        "civil_cargo"
+      ]
+    },
+    "B712": {
+      "label": "Boeing 717-200",
+      "roles": [
+        "civil_cargo"
+      ]
+    },
+    "B732": {
+      "label": "Boeing 737-200",
+      "roles": [
+        "civil_cargo",
+        "vip_executive"
+      ]
+    },
+    "B736": {
+      "label": "Boeing 737-600",
+      "roles": [
+        "civil_cargo"
+      ]
+    },
+    "B738": {
+      "label": "Boeing 737-800",
+      "roles": [
+        "civil_cargo"
+      ]
+    },
+    "DC93": {
+      "label": "Douglas DC-9-30 / VC-9",
+      "roles": [
+        "civil_cargo",
+        "vip_executive"
+      ]
+    },
+    "B762": {
+      "label": "Boeing 767-200",
+      "roles": [
+        "air_refuelling",
+        "civil_cargo"
+      ],
+      "desc_roles": [
+        [
+          "KC-46",
+          [
+            "air_refuelling"
+          ]
+        ],
+        [
+          "767",
+          [
+            "civil_cargo"
+          ]
+        ]
+      ]
+    },
+    "B763": {
+      "label": "Boeing 767-300",
+      "roles": [
+        "civil_cargo"
+      ]
+    },
+    "B764": {
+      "label": "Boeing 767-400",
+      "roles": [
+        "civil_cargo"
+      ]
+    },
+    "B767": {
+      "label": "Boeing 767",
+      "roles": [
+        "civil_cargo"
+      ]
+    },
+    "MD11": {
+      "label": "McDonnell Douglas MD-11F",
+      "roles": [
+        "civil_cargo"
+      ]
+    },
+    "B703": {
+      "label": "Boeing 707 family",
+      "roles": [
+        "awacs",
+        "command_relay",
+        "sigint_elint",
+        "civil_cargo"
+      ]
+    },
+    "A330": {
+      "label": "Airbus A330",
+      "roles": [
+        "air_refuelling",
+        "civil_cargo",
+        "vip_executive"
+      ]
+    },
+    "A332": {
+      "label": "Airbus A330-200",
+      "roles": [
+        "air_refuelling",
+        "civil_cargo"
+      ]
+    },
+    "A333": {
+      "label": "Airbus A330-300",
+      "roles": [
+        "civil_cargo"
+      ]
+    },
+    "B737": {
+      "label": "Boeing 737-700 / C-40 Clipper",
+      "roles": [
+        "vip_executive",
+        "civil_cargo"
+      ],
+      "desc_roles": [
+        [
+          "C-40",
+          [
+            "vip_executive"
+          ]
+        ],
+        [
+          "737",
+          [
+            "civil_cargo"
+          ]
+        ]
+      ]
+    },
+    "V22": {
+      "label": "V-22 Osprey",
+      "roles": [
+        "tilt_rotor"
+      ]
+    },
+    "SUCO": {
+      "label": "AH-1W/AH-1Z SuperCobra",
+      "roles": [
+        "rotary_attack"
+      ]
+    },
+    "UH1": {
+      "label": "UH-1 Iroquois",
+      "roles": [
+        "rotary_lift",
+        "csar"
+      ],
+      "desc_roles": [
+        [
+          "HH-1",
+          [
+            "csar"
+          ]
+        ],
+        [
+          "TH-1",
+          [
+            "rotary_lift"
+          ]
+        ],
+        [
+          "UH-1",
+          [
+            "rotary_lift"
+          ]
+        ]
+      ]
+    },
+    "UH1Y": {
+      "label": "UH-1Y Venom",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "H60": {
+      "label": "Sikorsky H-60 (UH/HH/MH/AH-60)",
+      "roles": [
+        "rotary_lift",
+        "rotary_attack",
+        "special_ops_lift",
+        "csar"
+      ],
+      "desc_roles": [
+        [
+          "HH-60",
+          [
+            "csar"
+          ]
+        ],
+        [
+          "MH-60",
+          [
+            "special_ops_lift"
+          ]
+        ],
+        [
+          "UH-60",
+          [
+            "rotary_lift"
+          ]
+        ]
+      ]
+    },
+    "H47": {
+      "label": "CH-47/MH-47 Chinook",
+      "roles": [
+        "rotary_lift",
+        "special_ops_lift"
+      ],
+      "desc_roles": [
+        [
+          "MH-47",
+          [
+            "special_ops_lift"
+          ]
+        ],
+        [
+          "CH-47",
+          [
+            "rotary_lift"
+          ]
+        ]
+      ]
+    },
+    "H53S": {
+      "label": "CH-53/MH-53 Sea Stallion",
+      "roles": [
+        "rotary_lift",
+        "special_ops_lift"
+      ],
+      "desc_roles": [
+        [
+          "MH-53",
+          [
+            "special_ops_lift"
+          ]
+        ],
+        [
+          "CH-53",
+          [
+            "rotary_lift"
+          ]
+        ]
+      ]
+    },
+    "H53": {
+      "label": "Sikorsky H-53 Sea Stallion family",
+      "roles": [
+        "rotary_lift",
+        "special_ops_lift",
+        "csar"
+      ]
+    },
+    "H64": {
+      "label": "AH-64 Apache",
+      "roles": [
+        "rotary_attack"
+      ]
+    },
+    "H500": {
+      "label": "MD500 / AH-6 / MH-6 Little Bird",
+      "roles": [
+        "rotary_attack",
+        "rotary_lift",
+        "special_ops_lift"
+      ],
+      "desc_roles": [
+        [
+          "MH-6",
+          [
+            "special_ops_lift"
+          ]
+        ],
+        [
+          "AH-6",
+          [
+            "rotary_attack"
+          ]
+        ],
+        [
+          "OH-6",
+          [
+            "rotary_attack"
+          ]
+        ]
+      ]
+    },
+    "A109": {
+      "label": "AgustaWestland AW109",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "A119": {
+      "label": "AgustaWestland AW119",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "A139": {
+      "label": "AgustaWestland AW139",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "A189": {
+      "label": "AgustaWestland AW189",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "AS50": {
+      "label": "Airbus AS350",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "AS55": {
+      "label": "Airbus AS555",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "AS65": {
+      "label": "Airbus AS565 Panther",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "AS35": {
+      "label": "Airbus AS350",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "AS32": {
+      "label": "Airbus AS332 Super Puma",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "B06": {
+      "label": "Bell 206 JetRanger",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "B06T": {
+      "label": "Bell 206L LongRanger",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "B212": {
+      "label": "Bell 212",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "B412": {
+      "label": "Bell 412",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "B429": {
+      "label": "Bell 429",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "B505": {
+      "label": "Bell 505 Jet Ranger X",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "EC25": {
+      "label": "EC-225 Super Puma / EC-725 Caracal",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "EC30": {
+      "label": "Eurocopter EC130",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "EC35": {
+      "label": "Eurocopter EC135",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "EC45": {
+      "label": "Eurocopter EC145",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "EC55": {
+      "label": "Eurocopter EC155",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "EC75": {
+      "label": "Airbus H175 (EC-175)",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "MI8": {
+      "label": "Mil Mi-8",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "S61": {
+      "label": "Sikorsky S-61",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "R22": {
+      "label": "Robinson R22",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "R44": {
+      "label": "Robinson R44",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "R66": {
+      "label": "Robinson R66",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "S76": {
+      "label": "Sikorsky S-76",
+      "roles": [
+        "rotary_lift"
+      ]
+    },
+    "S92": {
+      "label": "Sikorsky S-92",
+      "roles": [
+        "rotary_lift"
+      ]
+    }
+  }
+}

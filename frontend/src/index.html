@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- viewport-fit=cover: draw under the notch / home indicator and keep
+       controls clear of them via env(safe-area-inset-*) — without it those
+       insets evaluate to 0 and the map sits in a letterboxed area. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Flyover Country</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <meta property="og:title" content="Flyover Country">
+  <meta property="og:description" content="US military flights over Europe, mapped. See which countries enable which missions.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Flyover Country">
+  <meta name="twitter:description" content="US military flights over Europe, mapped. See which countries enable which missions.">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="anonymous">
+  <!-- tailwind.css and style.css are imported from app.js (not linked here)
+       so they are modules in Vite's graph: `vite build --watch` only
+       re-transforms graph modules, and a <link>ed stylesheet kept being
+       emitted from a stale cache after edits. Vite extracts them to one
+       CSS asset and injects the <link> into <head> at build time. -->
+</head>
+<body>
+  <!-- Phones in landscape are not a supported layout at all: this overlay
+       covers the full viewport (style.css, matched purely by a
+       CSS media query, no JS) and blocks interaction with everything
+       beneath it, rather than the app trying to lay out a usable UI in a
+       few hundred px of height. Static markup, not component-mounted, so
+       it can never be covered by anything the app itself renders. -->
+  <div id="rotate-overlay">
+    <svg class="rotate-overlay-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="7" y="2" width="10" height="16" rx="1.5"/>
+      <path d="M19 8a7 7 0 1 1-1.6-4.47"/>
+      <path d="M19 2.2V7h-4.8"/>
+    </svg>
+    <p class="rotate-overlay-text">Rotate your phone to portrait to use this site.</p>
+  </div>
+  <!-- #map's geometry stays in style.css (ID rule): MapLibre's own
+       stylesheet sets `.maplibregl-map { position: relative }` unlayered,
+       which would beat any layered utility placed here. -->
+  <div id="map"></div>
+  <div id="rect-select-hint" class="hidden" role="status" aria-live="polite">Drag a rectangle on the map to export the flights inside it. <kbd>Esc</kbd> to cancel.</div>
+  <div id="map-tooltip"></div>
+  <div id="toolbar-mount"></div>
+  <!-- The live on-map legend (OnMapLegend.svelte) mounts here. tour.js's
+       setLegendHidden() looks it up by id (`if (legend) ...`) to toggle
+       visibility during one tour step. -->
+  <div id="onmap-legend-mount"></div>
+  <!-- mobile-only fallback mount for the What-If "Refuse?"
+       pulldown — on desktop it mounts inside the toolbar's
+       #toolbar-whatif-mount instead (Toolbar.svelte, next to Explore); see
+       app.js's whatifPulldownTarget. -->
+  <div id="whatif-pulldown-mount"></div>
+  <div id="show-toggle-mount"></div>
+  <div id="updating-overlay" class="hidden">
+    <div id="updating-label"><span id="updating-spinner"></span>COMPUTING</div>
+  </div>
+
+  <!-- tour.js's showTourOrWelcome() looks up #welcome-overlay/#welcome-box
+       by id as its mount point and replaces #welcome-box's content before
+       showing it. -->
+  <div id="welcome-overlay" class="hidden">
+    <div id="welcome-box">
+      <h2>Flyover Country</h2>
+    </div>
+  </div>
+
+  <div id="loading-overlay">
+    <div id="loading-box">
+      <p id="loading-message"></p>
+      <div id="loading-bar"><div id="loading-bar-fill"></div></div>
+      <div id="loading-pct">0%</div>
+    </div>
+  </div>
+
+  <div id="sidebar-mount"></div>
+
+  <!-- `hidden` (style.css, !important) until app.js mounts the toolbar;
+       then a fixed strip directly above the 52px collapsed panel bar on the
+       sheet layout, and gone from md up where #map-toolbar takes over. -->
+  <div id="mobile-toolbar"
+       class="mobile-toolbar hidden fixed inset-x-0 bottom-[calc(52px_+_env(safe-area-inset-bottom,0px))] z-[55] flex items-center justify-center gap-1.5 px-2.5 py-2 md:hidden"></div>
+
+  <!-- Instagram has no web-share/pre-fill API, so sharing there is a manual
+       copy-paste flow: this modal copies the caption up front, keeps it
+       visible/re-copyable, and offers app-scheme deep links (with a web
+       fallback) to jump straight to a new post or story. -->
+  <div id="instagram-modal-mount"></div>
+
+  <div id="refview-mount"></div>
+
+  <div id="embed-popup-mount"></div>
+
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous" defer></script>
+  <!-- Vendored sharer.js v0.5.4 (MIT), pinned sha256
+       74eefaa54422f06ee638fc2deeda840469c20e8b08ca29041cc68d51a29f990d.
+       Dependency-free, no telemetry (audited); builds a share-intent URL +
+       window.open only. The [data-sharer] buttons are Svelte-rendered into
+       #toolbar-mount, not static markup here, so DOMContentLoaded auto-init
+       would run too early; app.js manually calls window.Sharer.init() right
+       after mountToolbar. CSP script-src 'self' — local, no CDN. -->
+  <script src="vendor/sharer.min.js" defer></script>
+  <script src="map-init.js" defer></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

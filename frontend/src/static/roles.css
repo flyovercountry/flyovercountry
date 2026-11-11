@@ -1,0 +1,169 @@
+/* Standalone stylesheet for the generated roles reference.
+   Kept separate from the app's style.css because this page is static and
+   loads on its own, exactly like methodology.html does. */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #0e0e0e;
+  color: #d8dce0;
+  line-height: 1.55;
+  font-size: 15px;
+}
+
+.roles-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+
+h1 {
+  font-size: 26px;
+  color: #fff;
+  margin-bottom: 12px;
+  line-height: 1.25;
+}
+h2 {
+  font-size: 19px;
+  color: #fff;
+  margin: 34px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #2a2a2a;
+}
+h3 {
+  font-size: 16px;
+  color: #cfe3f5;
+  margin: 26px 0 6px;
+}
+h4 {
+  font-size: 14px;
+  color: #e8e8e8;
+  margin: 16px 0 4px;
+  font-weight: 600;
+}
+
+p { margin-bottom: 10px; }
+.lead { font-size: 16px; color: #c0c6cc; }
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.88em;
+  background: rgba(255, 255, 255, 0.07);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: #9fc6e8;
+}
+
+a { color: #6ab4f0; }
+a:hover { text-decoration: underline; }
+
+/* The disclaimer has to be the first thing that catches the eye after the
+   title — the whole point is that the reader knows to distrust this before
+   they rely on it. */
+.disclaimer {
+  margin: 20px 0 8px;
+  padding: 16px 18px;
+  background: rgba(200, 120, 40, 0.10);
+  border: 1px solid #7a5a2a;
+  border-left: 4px solid #c8862a;
+  border-radius: 5px;
+}
+.disclaimer h2 {
+  margin: 0 0 8px;
+  border: none;
+  padding: 0;
+  font-size: 16px;
+  color: #f0c886;
+}
+.disclaimer p { font-size: 14px; }
+.disclaimer p:last-child { margin-bottom: 0; }
+
+.how-list { margin: 0 0 12px 20px; }
+.how-list li { margin-bottom: 7px; }
+
+.caveat, .order-note {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 3px solid #4a8abf;
+  border-radius: 3px;
+  font-size: 14px;
+}
+
+.group-index {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.group-index li {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #2e2e2e;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 13px;
+}
+.group-index .count { color: #8a8a8a; font-size: 11px; }
+
+.role-group {
+  margin-top: 22px;
+  padding-top: 4px;
+}
+.group-flag {
+  font-size: 12px;
+  font-weight: 400;
+  color: #8a8a8a;
+}
+.role { margin-bottom: 14px; }
+.role-desc { font-size: 13px; color: #a8aeb4; margin-bottom: 6px; }
+.synthetic {
+  font-size: 11px;
+  color: #c8862a;
+  font-weight: 400;
+}
+.no-types { font-size: 13px; color: #8a8a8a; font-style: italic; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 6px 0 4px;
+  font-size: 13px;
+}
+th, td {
+  text-align: left;
+  padding: 5px 8px;
+  border-bottom: 1px solid #232323;
+  vertical-align: top;
+}
+th {
+  color: #9a9a9a;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
+.other-roles { color: #8a8a8a; font-size: 12px; }
+.has-variants {
+  font-size: 10px;
+  color: #c8862a;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
+.buckets dt { margin-top: 8px; }
+.buckets dd { margin: 2px 0 0 16px; font-size: 14px; color: #b4bac0; }
+
+.regen-note {
+  margin-top: 32px;
+  padding-top: 12px;
+  border-top: 1px solid #262626;
+  font-size: 12px;
+  color: #8a8a8a;
+}
+
+@media (max-width: 620px) {
+  .roles-page { padding: 20px 14px 60px; }
+  table { font-size: 12px; }
+  th, td { padding: 4px 5px; }
+}

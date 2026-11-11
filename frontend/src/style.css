@@ -1,0 +1,2526 @@
+/* Breakpoints come from tailwind.css (@theme); `@variant md { ... }` etc.
+   below compile to the matching media queries, so this file never repeats
+   a pixel value for a breakpoint. */
+@reference "./tailwind.css";
+
+/* The universal margin/padding/box-sizing reset lives in tailwind.css's
+   `@layer base` (see the note there); everything below is unlayered. */
+html, body { height: 100%; }
+
+/* --sidebar-width-expanded is the panel's own width. --sidebar-width is the
+   layout offset everything else positions against (#map, #map-toolbar, the
+   legend, tour.js's sidebarWidth()) and drops to 0 while the panel is
+   folded; the panel keeps its width and slides out under a transform, so
+   its scroll position and open views survive. */
+:root {
+  --sidebar-width-expanded: 416px;
+  --sidebar-width: 416px;
+  /* Device safe-area insets (notch / home indicator; non-zero only with
+     viewport-fit=cover on such devices), as custom properties so JS
+     (tour.js) can read what CSS positions against. */
+  --sai-top: env(safe-area-inset-top, 0px);
+  --sai-bottom: env(safe-area-inset-bottom, 0px);
+  --sai-left: env(safe-area-inset-left, 0px);
+  --sai-right: env(safe-area-inset-right, 0px);
+}
+html.sidebar-collapsed { --sidebar-width: 0px; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #0a0a0a;
+  color: #e0e0e0;
+  overflow: hidden;
+}
+
+/* Mobile-first: the map fills the viewport; from md up it sits to the right
+   of the sidebar column (--sidebar-width drops to 0 while the panel is
+   folded). Kept as an ID rule rather than utilities on the element because
+   MapLibre's stylesheet sets `.maplibregl-map { position: relative }`
+   unlayered, which would beat a layered utility; the ID wins on
+   specificity. */
+#map {
+  position: fixed;
+  inset: 0;
+}
+@variant md {
+  #map {
+    position: absolute;
+    left: var(--sidebar-width);
+  }
+}
+
+#map-tooltip {
+  display: none;
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  background: rgba(10, 10, 10, 0.9);
+  color: #e0e0e0;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+  max-width: 500px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* The class-based rules below (.legend-tier, .legend-swatch, .legend-group,
+ * .legend-label, .legend-bar, .legend-note, .alt-tick) are used by the
+ * on-map legend (OnMapLegend.svelte / #onmap-legend-mount). */
+.legend-tier {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* legend swatches are a solid colour matching the map's
+ * per-permissiveness-level fill-color (see permissiveness-colors.js), set
+ * inline per-level by OnMapLegend.svelte via style:background-color. This
+ * replaces the earlier hatch-pattern approximation. */
+.legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.legend-group { margin-top: 16px; }
+.legend-label {
+  font-size: 11px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.legend-bar {
+  height: 10px;
+  border-radius: 2px;
+}
+.legend-note {
+  font-size: 9px;
+  /* was #666 (~3:1 on the on-map legend's near-black background) — below
+   * WCAG AA's 4.5:1 floor for sub-12px text. */
+  color: #9a9a9a;
+  margin-top: 4px;
+  line-height: 1.3;
+}
+/* Landings circles are sized by count — this mirrors that with a small
+ * dot-size scale instead of a colour bar. */
+#onmap-legend-ground-scale {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 4px 0;
+}
+.ground-scale-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.ground-scale-dot {
+  background: #e65100;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  flex-shrink: 0;
+}
+.ground-scale-label {
+  font-size: 10px;
+  color: #9a9a9a;
+}
+.alt-tick {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #888;
+  line-height: 1;
+}
+.alt-tick::before {
+  content: "";
+  display: block;
+  width: 1px;
+  height: 5px;
+  background: #666;
+  margin: 0 auto 2px;
+}
+
+#map-tooltip.country-tip {
+  white-space: normal;
+  max-width: 320px;
+  line-height: 1.4;
+  padding: 6px 10px;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+/* the "click to see..." instruction that closes every country
+   breadcrumb. Its own block with a rule above it, so it reads as an
+   instruction rather than as another sentence of the analysis. */
+#map-tooltip.country-tip .country-tip-hint {
+  display: block;
+  margin-top: 7px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 11px;
+  color: #9fc6e8;
+}
+
+
+/* #sidebar's geometry (hidden / full-screen sheet below md, fixed-width
+   column from md up) is on the element in ContentPanel.svelte; only the
+   non-layout parts stay here. */
+#sidebar {
+  background: #111;
+  gap: 1px;
+  transition: transform 0.25s ease;
+}
+
+/* collapsed desktop panel — slid out, still mounted (so scroll
+   position and open-section state survive), and made inert so nothing
+   inside it is tabbable while off-screen. */
+html.sidebar-collapsed #sidebar[data-mode="sidebar"] {
+  transform: translateX(-100%);
+  visibility: hidden;
+}
+#map,
+#map-toolbar,
+#show-subsection,
+#onmap-legend {
+  transition: left 0.25s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  #sidebar,
+  #map,
+  #map-toolbar,
+  #show-subsection,
+  #onmap-legend { transition: none; }
+}
+
+/* The collapse control lives on the panel edge; the expand control cannot
+   (the panel is gone), so it is pinned to the viewport edge instead. */
+/* hide/show is ONE mechanism, so its two controls look like
+   one mechanism — a labelled tab centred on the panel's right edge, and
+   its mirror image on the viewport's left edge once the panel is gone.
+   The first version put a bare chevron in the panel's top-right corner,
+   which read as 'a randomly placed less than symbol' with no indication
+   of what it did. */
+#sidebar-collapse-btn {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 14px 4px;
+  background: #1d2129;
+  border: 1px solid #3a4250;
+  border-right: none;
+  border-radius: 6px 0 0 6px;
+  color: #b6bec8;
+  cursor: pointer;
+  font-family: inherit;
+}
+#sidebar-collapse-btn:hover {
+  background: #262c36;
+  border-color: #5a6470;
+  color: #fff;
+}
+#sidebar-collapse-btn:focus-visible { outline: 2px solid #6ab4f0; outline-offset: 2px; }
+#sidebar-collapse-btn .fold-tab-label {
+  writing-mode: vertical-rl;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+#sidebar-expand-tab {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  /* Above #reference-view (2000): folded, the reader's `left` resolves to 0
+     and it covers this tab, which would leave no way back to the panel
+     while a section is open. */
+  z-index: 2100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 5px;
+  background: #1d2129;
+  border: 1px solid #3a4250;
+  border-left: none;
+  border-radius: 0 6px 6px 0;
+  color: #b0b0b0;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  font-family: inherit;
+}
+#sidebar-expand-tab:hover { color: #fff; border-color: #5a6470; background: #262c36; }
+#sidebar-expand-tab:focus-visible { outline: 2px solid #6ab4f0; outline-offset: 2px; }
+#sidebar-expand-tab .expand-tab-label {
+  writing-mode: vertical-rl;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Bottom scroll-shadow cue on the panel's scrollable region (ContentPanel's
+ * .panel-scroll; background inherited from #sidebar's #111), CSS only.
+ * Two background layers: a "cover" gradient (attachment: local) anchored to
+ * the true bottom of the content, and a "shadow" radial gradient
+ * (attachment: scroll) glued to the visible bottom edge. The cover scrolls
+ * over the shadow only when the end of the content is reached, so the cue
+ * shows exactly while there is more below and never when nothing overflows. */
+.panel-scroll {
+  background:
+    linear-gradient(rgba(17, 17, 17, 0), #111 70%) 0 100%,
+    radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0)) 0 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 32px, 100% 14px;
+  background-attachment: local, scroll;
+}
+
+#sidebar section, #sidebar header {
+  padding: 12px 16px;
+  background: #151515;
+}
+
+#sidebar h1 {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.site-logo {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.section-header .section-label { margin-bottom: 0; }
+
+/* Updating overlay */
+#updating-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.5);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+#updating-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ccc;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  background: rgba(10, 10, 10, 0.85);
+  padding: 10px 22px;
+  border-radius: 6px;
+  border: 1px solid #333;
+}
+
+#updating-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #333;
+  border-top-color: #4a8abf;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+#sidebar .section-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+#sidebar > section > .section-label {
+  font-size: 13px;
+}
+
+
+
+/* Closing line ("Can you stop this war?") — shared styling between the
+   country headline and the What-If summary. */
+.headline-closing {
+  font-weight: 600;
+  font-style: normal;
+  color: #fff;
+}
+
+
+#filters-section.whatif-readonly {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.disabled-overlay {
+  opacity: 0.3 !important;
+  pointer-events: none !important;
+}
+
+/* Toggle buttons (Show + Explore) */
+.toggle-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: inherit;
+  background: #222;
+  border: 1px solid #333;
+  border-radius: 3px;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.toggle-btn:hover:not(.disabled):not(.active) { background: #2a2a2a; color: #ccc; }
+
+.toggle-btn.active {
+  background: #2a4a6b;
+  border-color: #3a6a9b;
+  color: #fff;
+}
+
+.toggle-btn.disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+
+
+#show-subsection {
+  position: absolute;
+  bottom: 16px;
+  left: calc(var(--sidebar-width) + 260px);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(20, 20, 20, 0.85);
+  border: 1px solid #444;
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+  transition: opacity 0.15s;
+}
+
+#show-subsection.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.show-label {
+  font-size: 12px;
+  color: #888;
+  font-weight: 500;
+}
+
+/* On-map country colour legend (desktop): bottom-left overlay that starts as a
+   small pill and expands to the tier key. Dismissible back to the pill. Reuses
+   the same tier data + TIER_COLORS the map fill uses. Attribution sits
+   bottom-right, so bottom-left is free. */
+/* Placement (top-left on the sheet layout, bottom-left beside the panel
+   from md up) is on the element in OnMapLegend.svelte. */
+#onmap-legend {
+  background: rgba(20, 20, 20, 0.85);
+  border: 1px solid #444;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+  color: #ddd;
+  font-size: 12px;
+  max-width: 220px;
+}
+#onmap-legend-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: #888;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 6px 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+#onmap-legend-pill:hover { color: #ccc; }
+/* was a 9px glyph sitting next to the word, which gave no
+   sign the pill could be clicked at all. Now a 16px mark in its own
+   bordered well at the far end of the pill — the shape of a
+   disclosure control rather than punctuation. */
+#onmap-legend-pill .caret {
+  font-size: 16px;
+  line-height: 1;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: #cfd6dd;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid #4a4a4a;
+  border-radius: 4px;
+  transition: transform 0.15s, background 0.15s, border-color 0.15s;
+}
+#onmap-legend-pill:hover .caret {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+  border-color: #6a6a6a;
+}
+#onmap-legend-pill:focus-visible .caret {
+  outline: 2px solid #6ab4f0;
+  outline-offset: 1px;
+}
+/* Legend expands upward from the bottom, so the caret points where the
+   content will go: collapsed = ▴ (up), expanded = ▾ (down). */
+/* Rotate the glyph, not the bordered well — a rotated box reads as a
+   diamond, not a flipped chevron. */
+#onmap-legend.collapsed #onmap-legend-pill .caret > .caret-glyph { transform: rotate(180deg); }
+#onmap-legend-pill .caret > .caret-glyph {
+  display: inline-block;
+  transition: transform 0.15s;
+}
+/* Collapsed: body hidden, pill stays visible */
+#onmap-legend.collapsed #onmap-legend-body { display: none; }
+#onmap-legend-body { padding: 4px 12px 10px; }
+#onmap-legend-tiers {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+#onmap-legend-tiers .legend-tier { font-size: 12px; }
+#onmap-legend-alt-ticks {
+  position: relative;
+  height: 18px;
+  margin-top: 0;
+}
+/* What-If "Refuse?" pulldown as a standalone map overlay, top-centre. This
+   standalone mount is only used on the sheet layout (app.js: with the
+   desktop Toolbar mounted, the pulldown mounts inside #toolbar-whatif-mount
+   and the rule further down makes it static), so there is one geometry. */
+#whatif-pulldown {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  background: rgba(20, 20, 20, 0.9);
+  border: 1px solid #e53935;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+  color: #e0e0e0;
+}
+#whatif-pulldown-pill {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  background: none;
+  border: none;
+  color: #e0e0e0;
+  cursor: pointer;
+}
+#whatif-pulldown-pill:hover { color: #fff; }
+#whatif-pulldown-pill .caret {
+  font-size: 9px;
+  margin-left: 4px;
+  display: inline-block;
+}
+#whatif-pulldown-body {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+}
+#whatif-pulldown-label {
+  font-size: 12px;
+  color: #bbb;
+  white-space: nowrap;
+}
+#whatif-date-input {
+  background: #181c22;
+  color: #bcc4cc;
+  border: 1px solid #2a3040;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-family: inherit;
+  font-size: 13px;
+  color-scheme: dark;
+}
+#whatif-date-input::-webkit-calendar-picker-indicator { filter: invert(0.7); }
+#whatif-pulldown-collapse {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+#whatif-pulldown-collapse:hover { color: #e0e0e0; }
+
+/* on desktop the pulldown mounts inside #map-toolbar, next to
+   Explore (#toolbar-whatif-mount, Toolbar.svelte) — override the standalone
+   absolute-over-the-map positioning above with an inline layout so it reads
+   as part of the toolbar row. The collapsed pill sits in normal flex flow;
+   the expanded body still pops out as an absolutely-positioned dropdown
+   (same technique as #share-menu-list/#export-menu-list) so growing it
+   doesn't reflow Share/Export/Explore. */
+#toolbar-whatif-mount {
+  position: relative;
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+}
+#toolbar-whatif-mount #whatif-pulldown {
+  position: static;
+  transform: none;
+}
+#toolbar-whatif-mount #whatif-pulldown.expanded {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: auto;
+  right: 0;
+  /* Above #share-menu-list/#export-menu-list (z-index 11) and #map-toolbar
+     itself (10) within the toolbar's own stacking context — matches the
+     pulldown's original standalone z-index (15) so nothing else in the
+     toolbar can render over the open date picker. */
+  z-index: 15;
+}
+
+/* MapLibre attribution: smaller text + start collapsed via CSS.
+   MapLibre opens the <details> element (sets `open`) either synchronously on
+   load or later once source attribution arrives; map-init.js corrects both
+   cases but only once, so a later `open` (the user's own click) is left
+   alone. This [open]:not(:focus-within) rule is the actual visual guarantee
+   independent of that JS: it hides the attribution text whenever `open` is
+   set but the control isn't focused, and native <details>/<summary> toggling
+   still opens it on click (re-hidden by this same rule once the user clicks/
+   tabs away). Without this rule the text sat open by default and overlapped
+   the mobile toolbar's "Landings" button by ~65x19px. */
+.maplibregl-ctrl-attrib.maplibregl-compact {
+  font-size: 10px;
+}
+.maplibregl-ctrl-attrib.maplibregl-compact .maplibregl-ctrl-attrib-button {
+  width: 20px;
+  height: 20px;
+}
+.maplibregl-ctrl-attrib.maplibregl-compact[open]:not(:focus-within) .maplibregl-ctrl-attrib-inner {
+  display: none;
+}
+.maplibregl-ctrl-attrib-inner { font-size: 10px; }
+
+/* Shared by the filter panel's sub-sections (DateRangePicker,
+   TheaterToggle, RoleGroupPicker). */
+.filter-subsection {
+  margin-bottom: 14px;
+}
+.filter-section-title {
+  color: #8090a0;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 10px 0 8px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 3px 0;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.stat-row .stat-label { color: #888; flex: 1; }
+.stat-row .stat-value { color: #fff; font-weight: 500; }
+.stat-row .stat-col { color: #888; font-size: 11px; width: 80px; text-align: right; flex-shrink: 0; }
+.stat-row.stat-header { border-bottom: 1px solid #333; }
+.stat-row.stat-header .stat-label { color: #fff; font-weight: 600; }
+.stat-row.stat-header .stat-col { color: #888; font-weight: 600; }
+.stat-row.stat-total .stat-label { color: #fff; font-weight: 600; }
+.stat-row.stat-total .stat-col { color: #fff; }
+.stat-row.stat-total {
+  border-bottom: 1px solid #444;
+  margin-bottom: 4px;
+  padding-bottom: 6px;
+  background: rgba(255,255,255,0.02);
+}
+
+/* Unified per-country table (planes / flights / landings) —
+ * one "All Roles" row plus one row per non-empty, permitted
+ * role group (see panel-data.js's buildUnifiedCountryTable). The
+ * no-country-selected table reuses this same grid (one
+ * row per country instead of per role group) — the plain .stat-row/
+ * .stat-col flex-row markup below this block is not that table's
+ * replacement; it survives only for the still-separate What-If role table
+ * (panel-data.js's buildRoleTable, used by whatif.js). Five data columns at
+ * the shared sidebar width (416px, --sidebar-width) don't fit the .stat-col
+ * layout that older, two-column table uses — so this table gets its own
+ * narrower fixed column width and a two-row CSS-grid header (a spanning
+ * "Flights" label over three sub-columns) instead of a flat flex row. Not a
+ * <table> element: kept consistent with the rest of #sidebar's
+ * stat-row-based markup. */
+/* The Landings column is wider than the other numeric columns because its
+ * header word is one unbreakable token that measures 55-58px at this
+ * font/weight (Chromium renders it a few px wider than WebKit); the reader's
+ * tables wrap it tightly on 390-412px phones, so it must fit outright. The
+ * 1fr label column absorbs the difference. */
+.unified-stats-grid {
+  display: grid;
+  /* minmax(0, 1fr), not a bare 1fr: 1fr cannot shrink below its content,
+   * so a data row whose label is wider than the header row's empty first
+   * cell laid out WIDER than the header — every column shifted and the row
+   * overflowed the panel (390px phones, once the Landings column landed).
+   * With a 0 floor all three rows (header/subheader/data, each its own
+   * grid) always share the same column positions; the label ellipsizes. */
+  /* Value columns are 46px because "Previously" (subheader, 10px) is
+   * 46px wide; the Landings column is 58px because its group header
+   * "Landings" (11px/600) is 49px plus the 6+6px group-start inset.
+   * Operator columns need 7px for "=" / "+" at 10px. */
+  grid-template-columns: minmax(0, 1fr) 46px 7px 46px 7px 46px 46px 46px 58px;
+  column-gap: 3px;
+  align-items: center;
+  padding: 3px 0;
+  font-size: 12px;
+  border-bottom: 1px solid #1a1a1a;
+}
+.unified-stats-grid .stat-label {
+  color: #888;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Operator cells between the Flights sub-columns, so a data row reads as an
+   equation: Sum = Self + Previous. Narrow, dim, and part of the Flights
+   group's tint band so the three values plus two operators read as one unit. */
+.unified-stats-grid .stat-op {
+  background: rgba(106, 159, 216, 0.08);
+  color: #6a6a6a;
+  font-size: 10px;
+  text-align: center;
+}
+.unified-stats-grid.stat-header .stat-op,
+.unified-stats-grid.stat-subheader .stat-op { background: rgba(106, 159, 216, 0.05); }
+.unified-stats-grid .stat-col-narrow {
+  color: #888;
+  font-size: 11px;
+  text-align: right;
+  position: relative;
+  /* Suppresses the ~300ms double-tap-to-zoom compatibility delay some
+   * mobile browsers still apply before synthesizing "click" from a touch
+   * tap — without it, a single tap can fire two click events (an
+   * immediate one and a delayed compatibility one), double-toggling the
+   * tap-reveal detail (stat-tap.js) right back off. */
+  touch-action: manipulation;
+}
+.unified-stats-grid.stat-header {
+  border-bottom: 1px solid #333;
+}
+.unified-stats-grid.stat-header .stat-label,
+.unified-stats-grid.stat-header .stat-col-narrow,
+.unified-stats-grid.stat-header .stat-col-group-header { color: #fff; font-weight: 600; }
+.unified-stats-grid.stat-total {
+  border-bottom: 1px solid #444;
+  margin-bottom: 4px;
+  padding-bottom: 6px;
+  background: rgba(255,255,255,0.02);
+}
+.unified-stats-grid.stat-total .stat-label,
+.unified-stats-grid.stat-total .stat-col-narrow { color: #fff; font-weight: 600; }
+.unified-stats-grid .stat-col-group-header {
+  grid-column: span 5;
+  text-align: center;
+  font-size: 11px;
+}
+/* Planes' group header ("Sky"/"Ground") spans only its own two
+ * sub-columns, not Flights' five — three classes so this beats the span-5
+ * default above on specificity regardless of source order. */
+.unified-stats-grid .stat-col-group-header.stat-group-planes {
+  grid-column: span 2;
+}
+.unified-stats-grid .stat-col-group-header.stat-group-landings {
+  grid-column: span 1;
+}
+.unified-stats-grid.stat-subheader {
+  border-bottom: none;
+  padding: 0 0 3px;
+  /* align-items:center (inherited from .unified-stats-grid) still
+   * vertically centers this row's own content — .stat-subhead-2line below
+   * grows this ONE row's height to fit two lines; the header/data rows
+   * (each their own grid container) are unaffected. */
+  align-items: center;
+}
+/* was #666 (~3:1 on the sidebar's #151515/#1a1a1a
+ * backgrounds) — below WCAG AA's 4.5:1 floor for sub-12px text. */
+.unified-stats-grid.stat-subheader .stat-col-narrow { font-size: 10px; color: #9a9a9a; }
+/* "Previously crossed" split across two lines within its fixed
+ * 46px cell (a real newline in the source text + pre-line, not a <br> —
+ * see unifiedStatsHeader's own comment for why). line-height tightened so
+ * the two lines cost as little extra row height as possible. */
+.unified-stats-grid.stat-subheader .stat-subhead-2line {
+  white-space: pre-line;
+  line-height: 1.2;
+}
+
+/* group the seven data columns so Flights (3 value sub-columns +
+ * 2 operators) / Planes (2 sub-columns) read as two distinct blocks at a
+ * glance, not seven undifferentiated numbers. Three combined signals,
+ * applied consistently across all three rows (header/subheader/data) via
+ * the stat-group-* classes panel-data.js emits — a rule line + extra gap at
+ * each group boundary (label|Flights, Flights|Planes), plus a
+ * background tint banding the three Flights value columns together as one
+ * visual unit under their shared "Flights" header label. */
+.unified-stats-grid .stat-group-flights.stat-group-start,
+.unified-stats-grid .stat-group-planes.stat-group-start,
+.unified-stats-grid .stat-group-landings.stat-group-start {
+  margin-left: 6px;
+  padding-left: 6px;
+  border-left: 1px solid #2c2c2c;
+}
+.unified-stats-grid.stat-header .stat-group-flights.stat-group-start,
+.unified-stats-grid.stat-header .stat-group-planes.stat-group-start,
+.unified-stats-grid.stat-header .stat-group-landings.stat-group-start {
+  border-left-color: #3a3a3a;
+}
+/* Group headers are centred in their span, so they can give up most of the
+ * group-start inset (margin stays, so the rule lines still align with the
+ * rows below). "Landings" (49px) then fits its 58px column. */
+.unified-stats-grid.stat-header .stat-col-group-header.stat-group-start {
+  padding-left: 2px;
+}
+.unified-stats-grid .stat-group-flights {
+  background: rgba(106, 159, 216, 0.08);
+}
+.unified-stats-grid.stat-header .stat-group-flights,
+.unified-stats-grid.stat-subheader .stat-group-flights {
+  background: rgba(106, 159, 216, 0.05);
+}
+/* Bold the "Sum", "Sky" and "Landings" columns — the first (stat-group-start)
+ * column of each group — since they're the key summary numbers. Applies
+ * across all stats tables (panel, breakdown, etc.) that share
+ * unifiedStatsRow(). */
+.unified-stats-grid .stat-col-narrow.stat-group-start {
+  font-weight: 600;
+}
+
+/* Phones below sm (iPhone 12/13/14 at 390px, Pixel 7 at 412px): at the
+ * desktop column widths the label column would be ~34px and every country
+ * name an ellipsis. Value columns go to 42px (the subheader's "Previously"
+ * is 41.5px at 9px), figures to 10px, the group inset to 4+4, the gap to
+ * 2px — which leaves the label 54px at 390: "Germany"/"Slovakia" whole,
+ * only names of "United Kingdom" length ellipsize. Must stay after the base
+ * rules above (same specificity; source order decides). */
+@variant max-sm {
+  .unified-stats-grid {
+    grid-template-columns: minmax(0, 1fr) 42px 7px 42px 7px 42px 42px 42px 58px;
+    column-gap: 2px;
+  }
+  .unified-stats-grid .stat-col-narrow { font-size: 10px; }
+  .unified-stats-grid.stat-subheader .stat-col-narrow { font-size: 9px; }
+  .unified-stats-grid .stat-group-flights.stat-group-start,
+  .unified-stats-grid .stat-group-planes.stat-group-start,
+  .unified-stats-grid .stat-group-landings.stat-group-start {
+    margin-left: 4px;
+    padding-left: 4px;
+  }
+}
+
+/* Mobile tap-reveal: title tooltips don't work on
+ * pure-touch devices, so a tap on a percentage cell appends this inline
+ * detail span instead (see stat-tap.js). */
+.stat-col-narrow.expanded { color: #fff; cursor: pointer; }
+.stat-col-detail {
+  display: block;
+  font-size: 9px;
+  color: #6a9fd8;
+  white-space: nowrap;
+  font-weight: 400;
+}
+
+/* the reader's "See more statistics" tables (StatsBreakdownTab.svelte)
+ * — clickable .unified-stats-grid rows (unifiedStatsRow's `extraClass`/
+ * `dataAttrs` params), swapping the histogram above the table to the
+ * clicked row's own daily data.
+ * .breakdown-table-wrap's overflow-x is a defensive fallback for the
+ * 390px-phone case (a Model name plus five numeric columns is the tightest
+ * fit anywhere in this app) — the grid's own fixed 46px/9px numeric columns
+ * plus a wrapping (not truncating) 1fr label column normally fit without it,
+ * verified against both phone widths this project screenshots against
+ * (see test/frontend/helpers.js's PIXEL7_PORTRAIT/IPHONE13_PORTRAIT_390x844). */
+.breakdown-table-wrap { overflow-x: auto; }
+.unified-stats-grid.breakdown-row { cursor: pointer; touch-action: manipulation; }
+.unified-stats-grid.breakdown-row:hover { background: rgba(255, 255, 255, 0.06); }
+.unified-stats-grid.breakdown-row.selected {
+  background: rgba(106, 159, 216, 0.16);
+  outline: 1px solid #3a6a95;
+  outline-offset: -1px;
+}
+/* keyboard-focus ring for the role="button" rows unifiedStatsRow's
+ * ariaLabel param now adds (see StatsBreakdownTab.svelte's keydown
+ * delegation) — outline-offset is negative so the ring stays inside the
+ * row rather than overlapping the next row's own outline/border. */
+.unified-stats-grid.breakdown-row:focus-visible {
+  outline: 2px solid #6ab4f0;
+  outline-offset: -2px;
+}
+
+#sidebar-tip {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  background: rgba(10, 10, 10, 0.95);
+  color: #e0e0e0;
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  max-width: 280px;
+  line-height: 1.4;
+  border: 1px solid #444;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+/* one-time confirmation before leaving for adsbexchange. */
+#external-nav-warning {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.72);
+  padding: 20px;
+}
+.external-nav-box {
+  max-width: 440px;
+  background: #16181c;
+  border: 1px solid #3a4250;
+  border-radius: 8px;
+  padding: 20px 22px 18px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+.external-nav-box h2 {
+  font-size: 15px;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.external-nav-box p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #c4ccd4;
+  margin-bottom: 10px;
+}
+.external-nav-box .external-nav-note {
+  font-size: 11px;
+  color: #9a9a9a;
+  margin-bottom: 14px;
+}
+.external-nav-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.external-nav-actions button {
+  padding: 7px 14px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid #3a4250;
+  background: #1d2129;
+  color: #c4ccd4;
+}
+.external-nav-actions button:hover { background: #262b34; color: #fff; }
+.external-nav-actions .external-nav-go {
+  background: #1a4a7b;
+  border-color: #3a7abb;
+  color: #eaf2fa;
+}
+.external-nav-actions .external-nav-go:hover { background: #225d99; }
+.external-nav-actions button:focus-visible { outline: 2px solid #6ab4f0; outline-offset: 2px; }
+
+/* The round info button that opens the Methodology reader. A child of <body>, shown on
+   every layout, centred on MapLibre's 24x24 attribution circle (bottom:10
+   right:10, so a 34x34 button needs a 5px inset). The attribution stays in
+   the DOM: crediting the basemap is a licence condition. */
+#breadcrumb-mode-btn {
+  display: flex;
+  position: fixed;
+  right: 5px;
+  /* Sheet layout: sits ON the map attribution's white circle, covering it
+     completely — the explicit brief. Measured, not guessed:
+     .maplibregl-ctrl-attrib is 24x24 at right:10 bottom:62 there
+     (.maplibregl-ctrl-bottom-right at bottom:52 plus MapLibre's 10px
+     control margin); this button is 34x34, so centring it over the circle
+     needs (34-24)/2 = 5px of inset each side. The basemap credit is not
+     lost: '(c) CARTO, (c) OpenStreetMap contributors' is under Data
+     sources in methodology.html. Deliberately NO margin on
+     .maplibregl-ctrl-bottom-right: one pushed the attribution under
+     #show-subsection, which then intercepted its taps on WebKit (caught by
+     mobile-portrait.spec.js's hit-target check, not by eye). */
+  bottom: calc(52px + 5px + env(safe-area-inset-bottom, 0px));
+  z-index: 2400;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(20, 20, 20, 0.92);
+  border: 1px solid #4a4a4a;
+  color: #b8b8b8;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+#breadcrumb-mode-btn svg { width: 19px; height: 19px; }
+#breadcrumb-mode-btn:focus-visible { outline: 2px solid #6ab4f0; outline-offset: 2px; }
+
+body.panel-expanded #breadcrumb-mode-btn { display: none; }
+
+@variant md {
+  /* Desktop: no collapsed bar to clear; sit in the corner. */
+  #breadcrumb-mode-btn {
+    bottom: calc(5px + env(safe-area-inset-bottom, 0px));
+  }
+  /* While a reader section is open the panel bar and toolbar are hidden,
+     so .maplibregl-ctrl-bottom-right returns to bottom:0 and the circle
+     sits at bottom:10 — the button follows it down, same 5px centring. */
+  body.refview-open #breadcrumb-mode-btn {
+    bottom: 5px;
+    bottom: calc(5px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.country-stats-table { margin-top: 2px; }
+.country-stats-table .computing-msg {
+  font-size: 11px; color: #888; padding: 6px 0;
+}
+
+.country-stat-row {
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 0.12s;
+}
+.country-stat-row:hover { background: rgba(255,255,255,0.08); }
+/* The label is plain text (unifiedStatsRow never injects a sibling such as
+ * a colour dot), so it must NOT be a flex container: an anonymous flex
+ * item cannot ellipsize, and long country names were clipped mid-glyph on
+ * narrow phones instead of getting the "…" .unified-stats-grid .stat-label
+ * provides. */
+/* keyboard-focus ring — see the matching .breakdown-row rule
+ * above; same role="button" pattern via unifiedStatsRow's ariaLabel. */
+.country-stat-row:focus-visible {
+  outline: 2px solid #6ab4f0;
+  outline-offset: -2px;
+}
+
+.country-sources {
+  font-size: 11px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.country-sources a {
+  color: #4a8abf;
+  text-decoration: none;
+}
+
+.country-sources a:hover {
+  text-decoration: underline;
+}
+
+/* Rotate-to-portrait overlay: phones in landscape are not a supported
+   layout. CSS-only, matched by the media query below, no resize listener.
+   Markup lives in index.html so it sits outside every component-mounted
+   subtree and can never be covered by one.
+   z-index 10000 — one above the highest value used anywhere else in this
+   stylesheet (9999, shared by #sidebar-tip / #loading-overlay /
+   #tour-overlay, and by ContentPanel.svelte's `body.refview-open
+   .collapsed-bar` override at 2001) — so it covers literally everything,
+   including the guided tour and loading screen, on a landscape phone. */
+#rotate-overlay {
+  display: none;
+}
+
+@variant short {
+  #rotate-overlay {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px;
+    background: #111;
+    color: #e0e0e0;
+    text-align: center;
+  }
+}
+
+.rotate-overlay-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: #4a9adb;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rotate-overlay-text {
+  font-size: 16px;
+  font-weight: 500;
+  max-width: 320px;
+  margin: 0;
+}
+
+/* Loading overlay */
+#loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 10, 10, 0.85);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#loading-box {
+  text-align: center;
+  max-width: 420px;
+  padding: 0 24px;
+}
+
+#loading-message {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: #888;
+  margin-bottom: 16px;
+}
+
+#loading-bar {
+  height: 4px;
+  background: #333;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+#loading-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: #4a8abf;
+  border-radius: 2px;
+  transition: width 0.15s;
+}
+
+#loading-bar.indeterminate #loading-bar-fill {
+  width: 100%;
+  animation: indeterminate 1.2s ease-in-out infinite;
+  background: linear-gradient(90deg, transparent, #4a8abf, transparent);
+}
+
+@keyframes indeterminate {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+#loading-pct {
+  font-size: 12px;
+  color: #888;
+  margin-top: 6px;
+}
+
+/* Welcome overlay */
+#welcome-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.88);
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fade-in 0.3s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+#welcome-box {
+  max-width: 520px;
+  max-height: min(90vh, 760px);
+  overflow-y: auto;
+  padding: 32px;
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 10px;
+}
+
+#welcome-box h2 {
+  font-size: 20px;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+/* .welcome-body is the only rule kept from #welcome-box's original static
+ * content: tour.js's showTourChoice() replaces #welcome-box's HTML but
+ * re-uses this class in what it injects. */
+.welcome-body {
+  font-size: 14px;
+  color: #ccc;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+/* Parameter error overlay */
+.param-error {
+  text-align: left;
+}
+
+.param-error h2 {
+  font-size: 16px;
+  color: #e53935;
+  margin-bottom: 12px;
+}
+
+.param-error ul {
+  list-style: disc;
+  padding-left: 20px;
+  margin-bottom: 16px;
+}
+
+.param-error li {
+  font-size: 13px;
+  color: #ccc;
+  line-height: 1.6;
+}
+
+.param-error a {
+  color: #4a8abf;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.param-error a:hover {
+  text-decoration: underline;
+}
+
+/* Daily bar charts */
+.daily-chart-wrap {
+  margin-top: 0;
+  margin-bottom: 6px;
+}
+
+.daily-chart-label {
+  font-size: 10px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+}
+
+.daily-chart-tip {
+  font-size: 10px;
+  color: #aaa;
+  height: 0;
+  overflow: visible;
+  margin-bottom: 0;
+  position: relative;
+  z-index: 1;
+}
+.daily-chart-tip:not(:empty) {
+  height: 14px;
+}
+
+.daily-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: 40px;
+  background: #1a1a1a;
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
+.daily-bar {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  min-width: 1px;
+}
+
+.daily-bar-stack {
+  width: 100%;
+  background: #4a8abf;
+  border-radius: 1px 1px 0 0;
+  position: relative;
+  min-height: 1px;
+}
+
+/* Explore flights floating button */
+#explore-flights-btn.active {
+  background: rgba(26, 70, 120, 0.9);
+  color: #fff;
+  border-color: #4a9adb;
+  box-shadow: 0 0 8px 1px rgba(74, 154, 219, 0.3);
+}
+
+#rect-export-btn {
+  display: none;
+}
+
+#rect-export-btn.active {
+  background: rgba(26, 70, 120, 0.9);
+  color: #fff;
+  border-color: #4a9adb;
+  box-shadow: 0 0 8px 1px rgba(74, 154, 219, 0.3);
+}
+
+/* Rect selection overlay */
+#rect-select-overlay {
+  display: none;
+  position: absolute;
+  background: rgba(74, 154, 219, 0.15);
+  border: 2px solid rgba(74, 154, 219, 0.6);
+  z-index: 50;
+  pointer-events: none;
+}
+
+/* Hint banner shown while in rectangle-select mode (the Export dropdown closes
+   on click, so this is the on-screen cue to drag a rectangle). */
+#rect-select-hint {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #e0e0e0;
+  background: rgba(20, 20, 20, 0.92);
+  border: 1px solid #4a9adb;
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+#rect-select-hint kbd {
+  background: #333;
+  border-radius: 3px;
+  padding: 1px 5px;
+  font: inherit;
+  font-size: 12px;
+}
+
+/* ---- BEGIN app.js-owned block: Explore-mode on-map hint ----
+   Same visual pattern as #rect-select-hint just above, but its own element
+   (app.js, which owns this block, doesn't own index.html's static markup
+   to add a literal sibling there — see app.js's getExploreHint, which
+   creates this lazily and appends it to <body>, the same way #tap-hint is
+   created). Reused for two states, distinguished only by a background/
+   border tint so there's never a second, visually-competing hint: the
+   persistent "Explore is on" instructions, and (.explore-hint-flash) a
+   transient "nothing under the cursor" note on a miss-click. */
+#explore-hint {
+  position: absolute;
+  top: calc(16px + var(--sai-top));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #e0e0e0;
+  background: rgba(20, 20, 20, 0.92);
+  border: 1px solid #4a9adb;
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+#explore-hint.explore-hint-flash {
+  background: rgba(90, 40, 10, 0.92);
+  border-color: #db8a4a;
+}
+/* ---- END app.js-owned block ---- */
+
+/* Share button */
+/* Geometry (md-and-up strip across the top of the map; z 2050 so it
+   outranks #reference-view at 2000 — the Filters button must stay
+   reachable while a section is open) is on the element in Toolbar.svelte. */
+#map-toolbar {
+  pointer-events: none;
+}
+
+/* `:not(.toggle-btn)` matters. This rule is ID-scoped, so it
+   outranks the two-class `.toggle-btn.active` rule above — and once the
+   Show toggle moved INTO #map-toolbar, that meant the selected
+   Flights/Landings button rendered with the generic inactive toolbar
+   styling and the selection became invisible. The Show toggle keeps its own
+   .toggle-btn / .toggle-btn.active appearance; every other toolbar button
+   gets this one. */
+#map-toolbar button:not(.toggle-btn) {
+  pointer-events: auto;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 500;
+  background: rgba(20, 20, 20, 0.85);
+  color: #888;
+  border: 1px solid #444;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
+}
+
+#map-toolbar button:not(.toggle-btn):hover {
+  background: rgba(30, 30, 30, 0.9);
+  color: #ccc;
+  border-color: #555;
+}
+
+#share-btn.copied {
+  background: rgba(26, 70, 120, 0.9);
+  color: #fff;
+  border-color: #4a9adb;
+}
+
+/* Share is the primary action — subtly differentiated by color only,
+   no persistent border accent that looks like an active state. */
+#map-toolbar button.toolbar-primary {
+  color: #b8d4ee;
+}
+#map-toolbar button.toolbar-primary:hover {
+  color: #fff;
+}
+
+/* Share dropdown (Copy link / Embed / Native share + social icon grid).
+   Needs the same out-of-flow treatment as #export-menu below: without
+   position:relative/absolute here, opening the list reflowed the flex
+   #map-toolbar and shifted/resized #explore-flights-btn. */
+#share-menu {
+  position: relative;
+  pointer-events: auto;
+}
+#share-menu-trigger .caret,
+#export-menu-trigger .caret,
+#mobile-filter-btn .caret {
+  font-size: 9px;
+  margin-left: 2px;
+  display: inline-block;
+  transition: transform 0.15s;
+}
+#share-menu-trigger[aria-expanded="true"] .caret,
+#export-menu-trigger[aria-expanded="true"] .caret {
+  transform: rotate(180deg);
+}
+#map-toolbar #share-menu-trigger[aria-expanded="true"],
+#map-toolbar #export-menu-trigger[aria-expanded="true"] {
+  border-color: #4a9adb;
+  color: #fff;
+}
+#share-menu-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 190px;
+  max-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: rgba(20, 20, 20, 0.96);
+  border: 1px solid #444;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  z-index: 11;
+}
+#share-menu-list[hidden] { display: none; }
+#share-menu-list > button[role="menuitem"] {
+  width: 100%;
+  text-align: left;
+  color: #888;   /* explicit: was relying on inherited #map-toolbar button color,
+                    which breaks once #share-menu moves into #mobile-toolbar */
+  border-color: transparent;
+  background: transparent;
+}
+#share-menu-list > button[role="menuitem"]:hover,
+#share-menu-list > button[role="menuitem"]:focus-visible {
+  background: rgba(40, 40, 40, 0.9);
+  border-color: #555;
+  outline: none;
+}
+.share-menu-sep {
+  height: 1px;
+  margin: 4px 2px;
+  background: #3a3a3a;
+}
+.share-sheet-handle,
+.share-sheet-title,
+.share-sheet-cancel { display: none; }
+.share-action-icon { display: none; }
+
+/* Social platforms: tight icon-only grid, no text labels (tooltip via title/aria-label). */
+.share-menu-social {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 2px;
+}
+.share-menu-social button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  color: #ccc;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.share-menu-social button:hover,
+.share-menu-social button:focus-visible {
+  background: rgba(74, 154, 219, 0.16);
+  border-color: #4a9adb;
+  color: #fff;
+  outline: none;
+}
+.share-menu-social button svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+#share-whatsapp, #share-telegram { display: none; }
+
+.mastodon-form {
+  padding: 6px 2px 2px;
+}
+.mastodon-form-label {
+  display: block;
+  font-size: 11px;
+  color: #999;
+  margin-bottom: 4px;
+}
+.mastodon-input-row {
+  display: flex;
+  gap: 6px;
+}
+.mastodon-input-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid #555;
+  border-radius: 5px;
+  color: #ddd;
+  outline: none;
+}
+.mastodon-input-row input:focus {
+  border-color: #4a9adb;
+}
+.mastodon-share-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  background: rgba(74, 154, 219, 0.2);
+  border: 1px solid #4a9adb;
+  border-radius: 5px;
+  color: #4a9adb;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.mastodon-share-btn:hover {
+  background: rgba(74, 154, 219, 0.35);
+}
+
+/* Consolidated Export dropdown (Save image / Export CSV / Select area). */
+#export-menu {
+  position: relative;
+  pointer-events: auto;
+}
+#export-menu-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: max-content;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid #444;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  z-index: 11;
+}
+#export-menu-list[hidden] { display: none; }
+#export-menu-list button {
+  width: 100%;
+  text-align: left;
+  border-color: transparent;
+  background: transparent;
+}
+#export-menu-list button:hover,
+#export-menu-list button:focus-visible {
+  background: rgba(40, 40, 40, 0.9);
+  border-color: #555;
+  outline: none;
+}
+
+/* Narrow desktop: the six nowrap toolbar buttons overflow the right edge
+   (covering the MapLibre zoom control). Allow them to wrap onto a second
+   row, right-aligned, and compact them so they clear the zoom control. */
+@variant max-lg {
+  #map-toolbar button {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+}
+
+/* Embed popup */
+#embed-popup {
+  position: absolute;
+  top: 44px;
+  left: 470px;
+  z-index: 20;
+  width: 400px;
+  padding: 12px;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+}
+
+#embed-popup textarea {
+  width: 100%;
+  height: 60px;
+  background: #111;
+  color: #ccc;
+  border: 1px solid #333;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 11px;
+  padding: 6px;
+  resize: none;
+}
+
+#embed-popup .embed-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+}
+
+#embed-popup button {
+  padding: 4px 12px;
+  font-size: 11px;
+  font-family: inherit;
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #ccc;
+  cursor: pointer;
+}
+
+#embed-popup button:hover {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+#embed-popup .embed-hint {
+  font-size: 10px;
+  /* was #666 (~3:1 on #embed-popup's #1a1a1a background). */
+  color: #9a9a9a;
+}
+
+/* Instagram share modal: Instagram has no web-share/pre-fill API, so this is
+   a copy-the-caption-then-deep-link flow rather than a real share sheet. */
+#instagram-share-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+}
+#instagram-share-modal.hidden { display: none; }
+#instagram-modal-box {
+  position: relative;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  padding: 20px 20px 16px;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  color: #e0e0e0;
+}
+#instagram-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 7px;
+}
+#instagram-modal-close:hover { color: #fff; }
+#instagram-modal-box h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  padding-right: 20px;
+}
+.instagram-modal-note {
+  font-size: 12px;
+  color: #aaa;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+.instagram-modal-label {
+  display: block;
+  font-size: 11px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+#instagram-caption {
+  width: 100%;
+  height: 100px;
+  background: #111;
+  color: #ddd;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  padding: 8px;
+  resize: vertical;
+}
+.instagram-copy-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+}
+#instagram-copy-status {
+  font-size: 11px;
+  color: #6ab4f0;
+  line-height: 1.3;
+}
+#instagram-copy-status.stale { color: #888; }
+#instagram-copy-again {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-family: inherit;
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #ccc;
+  cursor: pointer;
+}
+#instagram-copy-again:hover { background: #2a2a2a; color: #fff; }
+.instagram-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+.instagram-modal-actions button {
+  padding: 9px 14px;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  background: rgba(74, 154, 219, 0.12);
+  border: 1px solid #3a6a95;
+  border-radius: 6px;
+  color: #cfe3f5;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.instagram-modal-actions button:hover {
+  background: rgba(74, 154, 219, 0.22);
+  border-color: #4a9adb;
+  color: #fff;
+}
+@variant max-sm {
+  #instagram-modal-box { width: 100%; margin: 0 16px; padding: 16px 16px 14px; }
+}
+
+/* Sidebar disabled when exploring flights */
+#sidebar.explore-mode #filters-section {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.hidden { display: none !important; }
+
+/* Scrollbar */
+#sidebar::-webkit-scrollbar { width: 6px; }
+#sidebar::-webkit-scrollbar-track { background: #111; }
+#sidebar::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+#sidebar-footer {
+  margin-top: auto;
+  position: sticky;
+  bottom: 0;
+  padding: 10px 16px;
+  background: #151515;
+  border-top: 1px solid #282828;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #888;
+  flex-shrink: 0;
+  z-index: 1;
+}
+#sidebar-footer .contact-link {
+  color: #4a8abf;
+  cursor: pointer;
+  text-decoration: none;
+}
+#sidebar-footer .contact-link:hover {
+  color: #6ab0e8;
+  text-decoration: underline;
+}
+
+/* The long-form country prose sits below the sticky footer and scrolls
+   beneath it; the bottom padding is the footer's height plus a margin so
+   the last paragraph can scroll clear of it. */
+#info-prose-section {
+  padding: 0 16px 96px;
+}
+@variant max-md {
+  /* The mobile footer is static, so no reserve is needed. */
+  #info-prose-section { padding-bottom: 16px; }
+}
+
+/* -- Sheet layout (phones and tablets below md) -- */
+@variant max-md {
+  #sidebar-footer { position: static; border-top: none; padding: 8px 0; }
+
+  /* While a reader section is open the panel collapses to the
+     country+section bar; the toolbar goes with it. */
+  body.refview-open .mobile-toolbar { display: none; }
+
+  /* Lift MapLibre's bottom-corner controls above the 52px collapsed bar so
+     the attribution button stays tappable. */
+  .maplibregl-ctrl-bottom-right,
+  .maplibregl-ctrl-bottom-left {
+    bottom: 52px;
+    bottom: calc(52px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Placement (fixed strip directly above the 52px collapsed panel bar,
+     symmetric 8px padding, gone from md up) is on the element in
+     index.html; only the paint and pointer rules stay here. */
+  .mobile-toolbar {
+    background: linear-gradient(to top, rgba(10,10,10,0.85) 60%, transparent);
+    pointer-events: none;
+  }
+  .mobile-toolbar > * { pointer-events: auto; }
+
+  /* In the mobile toolbar the Share trigger sits inline; #share-menu-list
+     keeps its own fixed bottom-sheet rules below. */
+  .mobile-toolbar #share-menu {
+    position: relative;
+    display: inline-flex;
+  }
+  .mobile-toolbar #share-menu-trigger,
+  .mobile-toolbar #mobile-filter-btn,
+  .mobile-toolbar #show-subsection {
+    position: relative;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    top: auto;
+    display: inline-flex;
+    margin: 0;
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  #mobile-toolbar #share-menu-trigger,
+  #mobile-toolbar #mobile-filter-btn {
+    background: rgba(20, 20, 20, 0.9);
+    color: #ccc;
+    border: 1px solid #444;
+    border-radius: 6px;
+    font-weight: 500;
+    font-family: inherit;
+    font-size: 11px;
+    line-height: 1.2;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+
+  /* On mobile both the Share sheet and the Filters panel open UPWARD from
+     this bottom toolbar, so their closed carets point up; Share's flips
+     back down while its sheet is open (a click will close it downward). */
+  #mobile-toolbar #share-menu-trigger .caret,
+  #mobile-toolbar #mobile-filter-btn .caret {
+    transform: rotate(180deg);
+  }
+  #mobile-toolbar #share-menu-trigger[aria-expanded="true"] .caret {
+    transform: rotate(0deg);
+  }
+
+  /* Share sheet: #share-menu-list becomes a full-width bottom sheet (instead
+     of the desktop anchored dropdown) with touch-sized tap targets. Reuses the
+     exact same element/ids/handlers as desktop — only presentation changes. */
+  .mobile-toolbar #share-menu-list {
+    position: fixed;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+    max-height: 70vh;
+    overflow-y: auto;
+    border-radius: 14px 14px 0 0;
+    border: 1px solid #444;
+    border-bottom: none;
+    padding: 10px 14px max(14px, env(safe-area-inset-bottom));
+    gap: 8px;
+    z-index: 120;   /* above the sheet (50) and toolbar (55) */
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.55);
+  }
+  /* Backdrop behind the sheet, dismissible by tapping outside (ShareMenu.svelte's
+     own outside-click handling already closes the menu on outside click;
+     this just visually separates the sheet from the map/UI behind it). */
+  .mobile-toolbar #share-menu-list:not([hidden])::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: rgba(0, 0, 0, 0.5);
+  }
+  .mobile-toolbar #share-menu-list > button[role="menuitem"] {
+    display: flex;
+    align-items: center;
+    padding: 12px 10px;
+    font-size: 14px;
+  }
+  .mobile-toolbar #share-menu-list > #embed-btn { display: none; }
+  .mobile-toolbar .share-menu-social {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .mobile-toolbar .share-menu-social button {
+    border-radius: 8px;
+  }
+  .mobile-toolbar #share-whatsapp,
+  .mobile-toolbar #share-telegram { display: flex; }
+  .mobile-toolbar .share-menu-social button svg {
+    width: 22px;
+    height: 22px;
+  }
+  .mobile-toolbar .has-native-share .share-menu-social,
+  .mobile-toolbar .has-native-share .share-menu-sep { display: none; }
+  .mobile-toolbar .has-native-share .mastodon-form { display: none; }
+  .mobile-toolbar .share-sheet-handle {
+    display: block;
+    width: 36px;
+    height: 4px;
+    margin: 2px auto 8px;
+    background: #555;
+    border-radius: 2px;
+  }
+  .mobile-toolbar .share-sheet-title {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: #ccc;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .mobile-toolbar .share-action-icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    flex-shrink: 0;
+    margin-right: 10px;
+  }
+  .mobile-toolbar .share-sheet-cancel {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    margin-top: 4px;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: inherit;
+    color: #999;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid #3a3a3a;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .mobile-toolbar .share-sheet-cancel:hover,
+  .mobile-toolbar .share-sheet-cancel:focus-visible {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ccc;
+    outline: none;
+  }
+
+  body.panel-expanded .mobile-toolbar {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  /* MapLibre's zoom control: below the notch / status bar. */
+  .maplibregl-ctrl-top-right { top: calc(10px + var(--sai-top)); }
+
+  #embed-popup {
+    position: fixed;
+    top: 100px;
+    bottom: auto;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    z-index: 120;          /* above the sheet (50) and toolbar (55) */
+  }
+
+  #welcome-box { max-width: 90vw; padding: 20px; }
+  #welcome-box h2 { font-size: 18px; }
+  .welcome-body { font-size: 13px; }
+
+  /* Tap-a-country discoverability hint */
+  #tap-hint {
+    position: fixed;
+    left: 50%;
+    /* 8px above the toolbar, which occupies 52-104px over the collapsed bar. */
+    bottom: 112px;
+    bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%) translateY(8px);
+    /* Below .mobile-toolbar (55) so the Share/Export sheets paint over it. */
+    z-index: 54;
+    background: rgba(26, 70, 120, 0.95);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 18px;
+    border: 1px solid #4a9adb;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    animation: tap-glow 1.8s ease-in-out infinite;
+  }
+  #tap-hint.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  @keyframes tap-glow {
+    0%, 100% { box-shadow: 0 0 8px 1px rgba(74, 154, 219, 0.4); }
+    50% { box-shadow: 0 0 18px 5px rgba(74, 154, 219, 0.75); }
+  }
+
+}
+
+/* ---- Full-map reference reader (opened from the panel's table of
+   contents, not a tab bar) ---- */
+body.refview-open { overflow: hidden; }
+body.refview-open #map-toolbar { display: none; }
+/* Geometry — full-viewport overlay below md, beside the panel (same left
+   offset as #map) from md up — is on the element in
+   ReferenceViewModal.svelte. */
+#reference-view { background: #151515; }
+#reference-view.hidden { display: none; }
+.refview-header {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 10px 16px; background: #1a1a1a; border-bottom: 1px solid #282828;
+  flex: 0 0 auto;
+}
+.refview-title { display: flex; align-items: baseline; gap: 10px; flex: 1 1 auto; min-width: 0; }
+.refview-country {
+  font-size: 15px; font-weight: 700; color: #e0e0e0; white-space: nowrap;
+}
+.refview-section-name {
+  font-size: 13px; color: #6ab4f0; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.refview-close {
+  flex: 0 0 auto; background: transparent; border: none; color: #999;
+  font-size: 26px; line-height: 1; cursor: pointer; padding: 0 4px;
+}
+.refview-close:hover { color: #e0e0e0; }
+.refview-body { flex: 1 1 auto; overflow-y: auto; padding: 22px 16px 60px; }
+.refview-content { max-width: 860px; margin: 0 auto; }
+.refview-h { color: #6ab4f0; font-size: 16px; margin: 0 0 12px; }
+.refview-prose p, .refview-body .info-heading + p, .refview-body p { line-height: 1.65; color: #cfd3d8; margin: 0 0 14px; }
+.refview-body .info-heading { color: #6ab4f0; font-weight: 400; font-size: 16px; text-transform: none; letter-spacing: normal; margin: 24px 0 12px; }
+.ref-empty { color: #888; font-style: italic; }
+
+/* sub-section headings inside the merged "What happened: Refusal
+   vs Cooperation" entry (SectionTab's `parts` shape) — visually distinct
+   from the one outer .refview-h title, but a clear step down from it, not
+   another top-level heading. */
+.refview-subh { color: #6ab4f0; font-weight: 600; font-size: 14px; margin: 22px 0 10px; }
+.refview-subh:first-child { margin-top: 0; }
+
+/* footnote markers */
+.cite-ref { font-size: .72em; line-height: 0; vertical-align: super; }
+.cite-marker {
+  background: #24405c; color: #7ec0ff; border: none; border-radius: 3px;
+  padding: 0 4px; margin: 0 1px; font-size: 11px; cursor: pointer;
+}
+.cite-marker:hover { background: #4a8abf; color: #fff; }
+.cite-marker:focus-visible { outline: 2px solid #6ab4f0; }
+
+/* citations list — moved into SectionTab.svelte's scoped <style> (the only
+   consumer of .cite-list/.cite-entry/.cite-badge/.cite-title/.cite-back/
+   .ref-citations); see that file for the current rules. */
+
+@variant max-md {
+  .refview-header { padding: 8px 10px; }
+  .refview-country { font-size: 14px; }
+  .refview-body { padding: 16px 12px 60px; }
+}
+
+/* the two global (no-country) reader entries.
+   .methodology-prose wraps methodology.html's own markup (h2/ul/ol/li/code/a,
+   plus its inline .glossary-term bold-label convention), rendered verbatim —
+   see global-content.js. None of that markup exists in the per-country
+   sections, so it needs its own rules here rather than reusing .refview-h /
+   .refview-subh (which are for the reader's own <h3>/<h4> section titles,
+   one level up from these in-content headings). */
+.methodology-prose h2 {
+  color: #6ab4f0; font-size: 15px; font-weight: 600;
+  margin: 26px 0 10px; padding-bottom: 4px; border-bottom: 1px solid #282828;
+}
+.methodology-prose h2:first-child { margin-top: 0; }
+.methodology-prose ul, .methodology-prose ol { padding-left: 20px; margin: 0 0 14px; }
+.methodology-prose li { margin-bottom: 6px; line-height: 1.6; color: #cfd3d8; }
+.methodology-prose code {
+  background: #1a1a1a; padding: 1px 5px; border-radius: 3px;
+  font-size: 12px; color: #d6dade;
+}
+.methodology-prose a { color: #6ab4f0; text-decoration: none; }
+.methodology-prose a:hover { text-decoration: underline; }
+.methodology-prose strong { color: #e0e0e0; }
+.methodology-prose .glossary-term { color: #fff; font-weight: 600; }
+.methodology-prose h3 {
+  font-size: 15px; color: #ddd; margin-top: 20px; margin-bottom: 8px;
+}
+.methodology-prose h4 {
+  font-size: 14px; color: #ccc; margin-top: 16px; margin-bottom: 6px;
+}
+.methodology-prose dl.def-list { margin-bottom: 14px; }
+.methodology-prose dl.def-list dt {
+  font-size: 14px; color: #fff; font-weight: 600; margin-top: 10px;
+}
+.methodology-prose dl.def-list dd {
+  font-size: 14px; color: #ccc; margin-left: 0; margin-bottom: 4px;
+}
+.methodology-prose table.param-table {
+  border-collapse: collapse; width: 100%; margin-bottom: 14px; font-size: 13px;
+}
+.methodology-prose table.param-table th,
+.methodology-prose table.param-table td {
+  text-align: left; padding: 4px 8px; border-bottom: 1px solid #222; color: #ccc;
+}
+.methodology-prose table.param-table th { color: #aaa; font-weight: 600; }
+.methodology-prose .pipeline-diagram-wrap { margin: 20px 0 24px; overflow: visible; }
+.methodology-prose .pipeline-diagram-wrap svg { display: block; width: 100%; height: auto; overflow: visible; }
+.methodology-prose .stage-link,
+.methodology-prose .data-node {
+  cursor: pointer;
+  transition: transform 0.15s ease-out;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.methodology-prose .stage-link:hover,
+.methodology-prose .data-node:hover,
+.methodology-prose .hover-clone {
+  transform: scale(3);
+}
+.methodology-prose .stage-link:hover rect {
+  filter: brightness(2) saturate(1.5);
+  stroke-width: 3;
+}
+.methodology-prose .stage-link:focus { outline: 2px solid #4a8abf; outline-offset: 2px; border-radius: 6px; }
+.methodology-prose .phase-crops { margin: 8px 0 16px; }
+.methodology-prose .phase-crop { display: block; width: 100%; max-width: 560px; max-height: 85vh; height: auto; margin: 0 auto 10px; }
+.methodology-prose .phase-rail { position: sticky; top: -22px; z-index: 3; display: flex; margin: 0 0 20px; background: #151515; border: 1px solid #333; border-radius: 6px; overflow-x: auto; scrollbar-width: none; }
+.methodology-prose .phase-rail a { flex: 1 0 auto; text-align: center; padding: 7px 10px; font-size: 12px; color: #bbb; text-decoration: none; white-space: nowrap; border-top: 2px solid transparent; border-right: 1px solid #333; }
+.methodology-prose .phase-rail a:last-child { border-right: 0; }
+.methodology-prose .phase-rail a:hover, .methodology-prose .phase-rail a:focus { background: #1f1f1f; color: #fff; }
+.methodology-prose .phase-rail a b { font-weight: 700; color: #ddd; }
+.methodology-prose .phase-rail a:nth-child(1) { border-top-color: #cc5555; }
+.methodology-prose .phase-rail a:nth-child(2) { border-top-color: #cc8844; }
+.methodology-prose .phase-rail a:nth-child(3) { border-top-color: #6a9acc; }
+.methodology-prose .phase-rail a:nth-child(4) { border-top-color: #5abba0; }
+.methodology-prose .phase-rail a:nth-child(5) { border-top-color: #ccaa55; }
+.methodology-prose .phase-rail a:nth-child(6) { border-top-color: #aa66aa; }
+.methodology-prose h2, .methodology-prose h3, .methodology-prose h4 { scroll-margin-top: 48px; }
+/* The rail pins at scrollport top + .refview-body padding-top + top, so the
+   negative top must equal that padding at each breakpoint (22px / 16px). */
+@variant max-md {
+  .methodology-prose .phase-rail { top: -16px; }
+}
+
+/* Glossary entry (GlossaryTab.svelte): a definition list, not prose — the
+   term stands alone on its own line so it stays legible at narrow (mobile
+   portrait) widths, with the definition indented below it rather than
+   run in beside it. */
+.glossary-list { margin: 0; }
+.glossary-entry { margin-bottom: 16px; }
+.glossary-entry:last-child { margin-bottom: 0; }
+.glossary-dt { font-weight: 700; color: #fff; font-size: 14px; margin-bottom: 3px; }
+.glossary-dd { margin: 0; color: #cfd3d8; line-height: 1.6; font-size: 13px; }
+
+/* ---- Custom tour overlay ---- */
+#tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: all;
+}
+#tour-overlay svg { pointer-events: none; }
+.tour-annotations {
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+.tour-annotation {
+  position: absolute;
+  z-index: 10;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.95), 0 0 40px rgba(0,0,0,0.6);
+  padding: 24px 28px;
+  border-radius: 16px;
+  background: radial-gradient(ellipse at center,
+    rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.65) 55%,
+    rgba(0,0,0,0.3) 80%, rgba(0,0,0,0) 100%);
+  /* Column layout: .tour-body holds the step text and is the only thing
+   * that scrolls; .tour-nav sits below it, outside the scroller, so
+   * Back/Next are on screen even when the text is taller than a small
+   * phone (iPhone SE/8). tour.js caps max-height inline from
+   * window.innerHeight — 100vh is not the visible height on iOS Safari.
+   * This CSS cap is the fallback for annotations tour.js does not size.
+   * pointer-events:auto is what lets the box catch the touch-scroll (the
+   * .tour-annotations container sets pointer-events:none). */
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
+  overflow: hidden;
+  pointer-events: auto;
+}
+.tour-body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+/* While more text remains below the fold, fade its bottom edge out and
+ * draw a rule above the nav so the block visibly reads as scrollable. */
+.tour-annotation.tour-scrollable .tour-body {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent);
+}
+.tour-annotation.tour-scrollable .tour-nav {
+  border-top: 1px solid rgba(255,255,255,0.22);
+  padding-top: 12px;
+}
+.tour-annotation h3 {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+.tour-annotation p {
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 10px;
+  color: rgba(255,255,255,0.88);
+}
+.tour-annotation p:last-child { margin-bottom: 0; }
+.tour-annotation .tour-aside {
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  font-style: italic;
+  margin-top: 12px;
+}
+.tour-nav {
+  display: flex;
+  align-items: center;
+  /* On a 320px-wide phone "Back · 4 / 4 · Explore the map" does not fit on
+   * one line; let the Next button drop to its own line, right-aligned,
+   * rather than run off the edge of the box. */
+  flex-wrap: wrap;
+  gap: 12px 14px;
+  margin-top: 18px;
+  flex-shrink: 0;
+  pointer-events: auto;
+}
+.tour-nav .tour-btn-next { margin-left: auto; }
+.tour-skip-top {
+  position: absolute;
+  top: calc(16px + var(--sai-top));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  pointer-events: auto;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 20px;
+  color: rgba(255,255,255,0.7);
+  font-size: 13px;
+  padding: 6px 20px;
+  cursor: pointer;
+  text-shadow: none;
+}
+.tour-skip-top:hover {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+}
+.tour-secondary {
+  opacity: 0.65;
+  padding: 16px 18px;
+  border-radius: 12px;
+}
+.tour-secondary p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.tour-progress {
+  color: rgba(255,255,255,0.5);
+  font-size: 13px;
+  min-width: 36px;
+  text-align: center;
+}
+.tour-btn {
+  padding: 8px 20px;
+  border-radius: 5px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #fff;
+  white-space: nowrap;
+}
+.tour-btn-next { background: rgba(42,90,138,0.85); }
+.tour-btn-next:hover { background: rgba(58,122,191,0.9); }
+.tour-btn-back {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.6);
+}
+.tour-btn-back:hover { border-color: rgba(255,255,255,0.5); color: #fff; }
+
+.tour-choice-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  justify-content: center;
+}
+.tour-choice-btn {
+  padding: 10px 24px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  background: #2a5a8a;
+  color: #fff;
+}
+.tour-choice-btn:hover {
+  background: #3a7abf;
+}
+.tour-choice-secondary {
+  background: transparent;
+  border: 1px solid #555;
+  color: #aaa;
+}
+.tour-choice-secondary:hover {
+  border-color: #888;
+  color: #ddd;
+  background: transparent;
+}
+
+/* Narrow CSS viewports: small phones, and any phone with Safari page zoom
+ * / larger text on (an iPhone SE at 130% lays out at 246px). Tighter
+ * padding and slightly smaller type keep more than three words per line
+ * and let Back · n/N · Next fit on one row. Must stay after the base tour
+ * rules above: same specificity, so source order decides. */
+@variant max-xs {
+  .tour-annotation { padding: 16px 18px; border-radius: 12px; }
+  .tour-annotation h3 { font-size: 19px; margin-bottom: 8px; }
+  .tour-annotation p { font-size: 14px; line-height: 1.5; margin-bottom: 8px; }
+  .tour-annotation .tour-aside { font-size: 12px; margin-top: 8px; }
+  .tour-nav { gap: 8px 10px; margin-top: 14px; }
+  .tour-progress { flex: 1; min-width: 0; font-size: 12px; }
+  .tour-btn { padding: 7px 12px; font-size: 13px; }
+}
+
+/* TL;DR intro screen (tour.js showIntro): one card over the dimmed map,
+ * shown before the tour's annotated steps. The card is a column: .tldr-body
+ * is the only thing that scrolls and .tldr-nav stays pinned below it, so
+ * the button is reachable without scrolling on the shortest phones. The
+ * overlay's padding keeps the card clear of the Skip pill and of the
+ * device safe areas. */
+#tldr-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(60px + var(--sai-top)) calc(16px + var(--sai-right))
+           calc(16px + var(--sai-bottom)) calc(16px + var(--sai-left));
+  background: rgba(8, 10, 14, 0.9);
+  animation: fade-in 0.3s ease;
+}
+.tldr-box {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 580px;
+  max-height: 100%;
+  background: #151a21;
+  border: 1px solid #2c3a4a;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+.tldr-body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 28px 30px 10px;
+}
+.tldr-body h2 {
+  margin: 0 0 14px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+}
+.tldr-body p {
+  margin: 0 0 12px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #d5dde6;
+}
+.tldr-list-intro { margin-bottom: 8px; }
+.tldr-body ul {
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+}
+.tldr-body li {
+  position: relative;
+  margin-bottom: 7px;
+  padding-left: 18px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: #d5dde6;
+}
+.tldr-body li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.6em;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #5a9adb;
+}
+.tldr-disclaimer {
+  font-size: 13px;
+  color: #8fa0b3;
+}
+.tldr-nav {
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  padding: 12px 30px 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.tldr-scrollable .tldr-nav {
+  box-shadow: 0 -14px 18px -12px rgba(0, 0, 0, 0.75);
+}
+#tldr-start {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  font-size: 15px;
+}
+.tldr-chevron { font-size: 20px; line-height: 1; margin-top: -2px; }
+#tldr-start:focus-visible { outline: 2px solid #6ab4f0; outline-offset: 2px; }
+
+@variant max-xs {
+  #tldr-overlay { padding-left: calc(10px + var(--sai-left)); padding-right: calc(10px + var(--sai-right)); }
+  .tldr-body { padding: 20px 18px 6px; }
+  .tldr-body h2 { font-size: 19px; margin-bottom: 10px; }
+  .tldr-body p, .tldr-body li { font-size: 14px; line-height: 1.5; }
+  .tldr-nav { padding: 10px 18px 16px; }
+  #tldr-start { padding: 9px 16px; font-size: 14px; }
+}
