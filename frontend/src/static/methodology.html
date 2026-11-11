@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Methodology - Flyover Country</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      line-height: 1.7;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 22px;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 32px;
+    }
+    h2 {
+      font-size: 16px;
+      color: #fff;
+      margin-top: 28px;
+      margin-bottom: 12px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #333;
+    }
+    h3 {
+      font-size: 15px;
+      color: #ddd;
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+    h4 {
+      font-size: 14px;
+      color: #ccc;
+      margin-top: 16px;
+      margin-bottom: 6px;
+    }
+    p {
+      font-size: 14px;
+      color: #ccc;
+      margin-bottom: 12px;
+    }
+    a { color: #4a8abf; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 24px;
+      font-size: 13px;
+    }
+    ul, ol {
+      padding-left: 20px;
+      margin-bottom: 12px;
+    }
+    li {
+      font-size: 14px;
+      color: #ccc;
+      margin-bottom: 6px;
+    }
+    code {
+      background: #1a1a1a;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 13px;
+    }
+    .glossary-term {
+      color: #fff;
+      font-weight: 600;
+    }
+    table.param-table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 14px;
+      font-size: 13px;
+    }
+    table.param-table th,
+    table.param-table td {
+      text-align: left;
+      padding: 4px 8px;
+      border-bottom: 1px solid #222;
+      color: #ccc;
+    }
+    table.param-table th {
+      color: #aaa;
+      font-weight: 600;
+    }
+    dl.def-list { margin-bottom: 14px; }
+    dl.def-list dt {
+      font-size: 14px;
+      color: #fff;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    dl.def-list dd {
+      font-size: 14px;
+      color: #ccc;
+      margin-left: 0;
+      margin-bottom: 4px;
+    }
+
+    /* One flowing document; the in-page cross-references are #anchor
+       jumps. The app's reader extracts this page's sections
+       (global-content.js), and the page also works standalone with no JS. */
+    @media (prefers-reduced-motion: no-preference) {
+      html { scroll-behavior: smooth; }
+    }
+.pipeline-diagram-wrap {
+  margin: 20px 0 24px;
+}
+.pipeline-diagram-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.pipeline-diagram-wrap .stage-link,
+.pipeline-diagram-wrap .data-node {
+  cursor: pointer; transition: transform 0.15s ease-out;
+  transform-box: fill-box; transform-origin: center;
+}
+.pipeline-diagram-wrap .stage-link:hover,
+.pipeline-diagram-wrap .data-node:hover,
+.pipeline-diagram-wrap .hover-clone { transform: scale(3); }
+.pipeline-diagram-wrap .stage-link:hover rect { filter: brightness(2) saturate(1.5); stroke-width: 3; }
+.pipeline-diagram-wrap svg { overflow: visible; }
+.pipeline-diagram-wrap .stage-link:focus { outline: 2px solid #4a8abf; outline-offset: 2px; border-radius: 6px; }
+/* Per-phase crops of the diagram above, legible without hover-zoom. */
+.phase-crops { margin: 8px 0 16px; }
+.phase-crop { display: block; width: 100%; max-width: 560px; max-height: 85vh; height: auto; margin: 0 auto 10px; }
+/* Sticky segmented rail of the six phases; all segments always visible
+   (scrolls sideways on narrow screens rather than collapsing). */
+.phase-rail { position: sticky; top: 0; z-index: 3; display: flex; flex-wrap: wrap; margin: 0 0 20px; background: #0a0a0a; border: 1px solid #333; border-radius: 6px; overflow: hidden; }
+.phase-rail a { flex: 1 0 auto; text-align: center; padding: 7px 8px; font-size: 12px; color: #bbb; text-decoration: none; white-space: nowrap; border-top: 2px solid transparent; border-right: 1px solid #333; border-bottom: 1px solid #333; margin-bottom: -1px; }
+.phase-rail a:hover, .phase-rail a:focus { background: #1c1c1c; color: #fff; }
+.phase-rail a b { font-weight: 700; color: #ddd; }
+.phase-rail a:nth-child(3) { border-top-color: #cc5555; }
+.phase-rail a:nth-child(4) { border-top-color: #cc8844; }
+.phase-rail a:nth-child(5) { border-top-color: #6a9acc; }
+.phase-rail a:nth-child(6) { border-top-color: #5abba0; }
+.phase-rail a:nth-child(7) { border-top-color: #ccaa55; }
+.phase-rail a:nth-child(8) { border-top-color: #aa66aa; }
+/* Phones: twelve items tile as 3x4 (or 4x3 on the narrowest); "Top" is
+   dropped there, since the reader's close button and the page's back link
+   already serve that purpose, and thirteen items always leave an orphan. */
+@media (max-width: 600px) {
+  .phase-rail a:first-child { display: none; }
+  .phase-rail a { flex: 1 0 25%; padding: 7px 4px; }
+}
+h2, h3, h4 { scroll-margin-top: 48px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="back-link">&larr; Back to map</a>
+    <h1>Methodology</h1>
+    <p class="subtitle">How this data is collected, processed, and presented.</p>
+
+    <nav class="phase-rail" aria-label="Page sections">
+      <a href="#in-brief">Top</a>
+      <a href="#pipeline">Diagram</a>
+      <a href="#phase-generate"><b>1</b> Generate</a>
+      <a href="#phase-ingest"><b>2</b> Ingest</a>
+      <a href="#phase-preprocess"><b>3</b> Preprocess</a>
+      <a href="#phase-partition"><b>4</b> Timeline</a>
+      <a href="#phase-geography"><b>5</b> Landing</a>
+      <a href="#phase-publish"><b>6</b> Publish</a>
+      <a href="#routes">Routes</a>
+      <a href="#what-if">Refusal</a>
+      <a href="#role-classification">Roles</a>
+      <a href="#country-reference">Legal</a>
+      <a href="#limitations">Limitations</a>
+      <a href="#glossary">Glossary</a>
+    </nav>
+
+    <div class="pipeline-diagram-wrap" id="pipeline">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 38 1380 1346" role="img" aria-label="Pipeline data flow diagram. Each stage links to its description.">
+      <defs>
+      <marker id="ah" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4 L0,8 Z" fill="#666"/></marker>
+      <marker id="ah-red" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4 L0,8 Z" fill="#cc5555"/></marker>
+      <marker id="ah-orange" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4 L0,8 Z" fill="#cc8844"/></marker>
+      <marker id="ah-blue" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4 L0,8 Z" fill="#6a9acc"/></marker>
+      <marker id="ah-green" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4 L0,8 Z" fill="#5abba0"/></marker>
+      <marker id="ah-gold" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4 L0,8 Z" fill="#eebb55"/></marker>
+      <marker id="ah-amber" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4 L0,8 Z" fill="#ccaa55"/></marker>
+      <marker id="ah-purple" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4 L0,8 Z" fill="#aa66aa"/></marker>
+      </defs>
+      <g id="pipeline-all">
+      <rect x="15" y="50" width="300" height="1234" rx="8" fill="none" stroke="#3a1a1a" stroke-width="1" stroke-dasharray="6,3" opacity="0.6"/>
+      <text x="28" y="68" fill="#8a3a3a" font-family="Helvetica,sans-serif" font-size="14" font-weight="bold" opacity="0.7">1. generate</text>
+      <rect x="335" y="50" width="260" height="316" rx="8" fill="none" stroke="#3a2a14" stroke-width="1" stroke-dasharray="6,3" opacity="0.6"/>
+      <text x="348" y="68" fill="#9a5a2a" font-family="Helvetica,sans-serif" font-size="14" font-weight="bold" opacity="0.7">2. ingest</text>
+      <rect x="570" y="50" width="270" height="514" rx="8" fill="none" stroke="#1a2a3a" stroke-width="1" stroke-dasharray="6,3" opacity="0.6"/>
+      <text x="583" y="68" fill="#4a7aaa" font-family="Helvetica,sans-serif" font-size="14" font-weight="bold" opacity="0.7">3. preprocess</text>
+      <rect x="825" y="50" width="480" height="648" rx="8" fill="none" stroke="#1a2a1e" stroke-width="1" stroke-dasharray="6,3" opacity="0.6"/>
+      <text x="838" y="68" fill="#4a9a7a" font-family="Helvetica,sans-serif" font-size="14" font-weight="bold" opacity="0.7">4. timeline</text>
+      <rect x="335" y="738" width="530" height="556" rx="8" fill="none" stroke="#2a2214" stroke-width="1" stroke-dasharray="6,3" opacity="0.6"/>
+      <text x="348" y="756" fill="#aa8a4a" font-family="Helvetica,sans-serif" font-size="14" font-weight="bold" opacity="0.7">5. landing</text>
+      <rect x="905" y="738" width="310" height="556" rx="8" fill="none" stroke="#28142e" stroke-width="1" stroke-dasharray="6,3" opacity="0.6"/>
+      <text x="918" y="756" fill="#8a4a8a" font-family="Helvetica,sans-serif" font-size="14" font-weight="bold" opacity="0.7">6. publish</text>
+      <line x1="325" y1="733" x2="1365" y2="733" stroke="#222" stroke-width="1" opacity="0.3"/>
+      <g class="data-node">
+      <rect x="55" y="70" width="220" height="48" rx="5" fill="#111" stroke="#666" stroke-width="1.2" stroke-dasharray="4,2"/>
+      <text x="165" y="94" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="9">mictronics + basic_ac databases</text>
+      <text x="165" y="108" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="9">aircraft with military flags (JSON, gzip)</text>
+      </g>
+      <a href="#stage-1-1-mil" class="stage-link">
+      <rect x="70" y="162" width="190" height="48" rx="5" fill="#2a1414" stroke="#cc5555" stroke-width="2"/>
+      <text x="165" y="186" text-anchor="middle" fill="#e0e0e0" font-family="Helvetica,sans-serif" font-size="11" font-weight="bold">1.1 mil</text>
+      <text x="165" y="200" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11">identify US military aircraft</text>
+      </a>
+      <g class="data-node">
+      <rect x="60" y="254" width="210" height="48" rx="5" fill="#1a0e0e" stroke="#cc5555" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="165" y="278" text-anchor="middle" fill="#cc5555" font-family="Helvetica,sans-serif" font-size="10">mil_icao24.txt</text>
+      <text x="165" y="292" text-anchor="middle" fill="#cc5555" font-family="Helvetica,sans-serif" font-size="10">hex prefixes + individual IDs</text>
+      </g>
+      <g class="data-node">
+      <rect x="55" y="346" width="220" height="48" rx="5" fill="#111" stroke="#666" stroke-width="1.2" stroke-dasharray="4,2"/>
+      <text x="165" y="370" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="9">OurAirports CSV + OSM military CSV</text>
+      <text x="165" y="384" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="9">airport locations, types, identifiers</text>
+      </g>
+      <a href="#stage-1-2-airports" class="stage-link">
+      <rect x="70" y="438" width="190" height="48" rx="5" fill="#2a1414" stroke="#cc5555" stroke-width="2"/>
+      <text x="165" y="462" text-anchor="middle" fill="#e0e0e0" font-family="Helvetica,sans-serif" font-size="11" font-weight="bold">1.2 airports</text>
+      <text x="165" y="476" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11">build airport + military base DB</text>
+      </a>
+      <g class="data-node">
+      <rect x="60" y="530" width="210" height="48" rx="5" fill="#1a0e0e" stroke="#cc5555" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="165" y="554" text-anchor="middle" fill="#cc5555" font-family="Helvetica,sans-serif" font-size="10">airports.pkl</text>
+      <text x="165" y="568" text-anchor="middle" fill="#cc5555" font-family="Helvetica,sans-serif" font-size="10">name, coords, type, country</text>
+      </g>
+      <g class="data-node">
+      <rect x="55" y="622" width="220" height="48" rx="5" fill="#111" stroke="#666" stroke-width="1.2" stroke-dasharray="4,2"/>
+      <text x="165" y="646" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="9">Natural Earth 10m admin-0 shapefile</text>
+      <text x="165" y="660" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="9">country polygons + pipeline config</text>
+      </g>
+      <a href="#stage-1-3-raster" class="stage-link">
+      <rect x="70" y="714" width="190" height="48" rx="5" fill="#2a1414" stroke="#cc5555" stroke-width="2"/>
+      <text x="165" y="738" text-anchor="middle" fill="#e0e0e0" font-family="Helvetica,sans-serif" font-size="11" font-weight="bold">1.3 raster</text>
+      <text x="165" y="752" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11">rasterise country boundaries</text>
+      </a>
+      <g class="data-node">
+      <rect x="60" y="806" width="210" height="48" rx="5" fill="#1a0e0e" stroke="#cc5555" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="165" y="830" text-anchor="middle" fill="#cc5555" font-family="Helvetica,sans-serif" font-size="10">airspace.npy</text>
+      <text x="165" y="844" text-anchor="middle" fill="#cc5555" font-family="Helvetica,sans-serif" font-size="10">0.01-deg grid, country per cell</text>
+      </g>
+      <a href="#stage-1-4-boundaries" class="stage-link">
+      <rect x="70" y="898" width="190" height="48" rx="5" fill="#2a1414" stroke="#cc5555" stroke-width="2"/>
+      <text x="165" y="922" text-anchor="middle" fill="#e0e0e0" font-family="Helvetica,sans-serif" font-size="11" font-weight="bold">1.4 boundaries</text>
+      <text x="165" y="936" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11">simplify Natural Earth shapes</text>
+      </a>
+      <g class="data-node">
+      <rect x="60" y="990" width="210" height="48" rx="5" fill="#1a0e0e" stroke="#cc5555" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="165" y="1014" text-anchor="middle" fill="#cc5555" font-family="Helvetica,sans-serif" font-size="10">boundaries.geojson</text>
+      <text x="165" y="1028" text-anchor="middle" fill="#cc5555" font-family="Helvetica,sans-serif" font-size="10">focus-country polygons for map</text>
+      </g>
+      <g class="data-node">
+      <rect x="55" y="1082" width="220" height="34" rx="5" fill="#111" stroke="#666" stroke-width="1.2" stroke-dasharray="4,2"/>
+      <text x="165" y="1106" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="9">data/in/config/roles.json</text>
+      </g>
+      <a href="#stage-1-5-roles" class="stage-link">
+      <rect x="70" y="1160" width="190" height="62" rx="5" fill="#2a1414" stroke="#cc5555" stroke-width="2"/>
+      <text x="165" y="1184" text-anchor="middle" fill="#e0e0e0" font-family="Helvetica,sans-serif" font-size="11" font-weight="bold">1.5 roles</text>
+      <text x="165" y="1198" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11">generate role taxonomy +</text>
+      <text x="165" y="1212" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">roles.html reference page</text>
+      </a>
+      <g class="data-node">
+      <rect x="60" y="1266" width="210" height="34" rx="5" fill="#1a0e0e" stroke="#cc5555" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="165" y="1290" text-anchor="middle" fill="#cc5555" font-family="Helvetica,sans-serif" font-size="10">roles.html</text>
+      </g>
+      <g class="data-node">
+      <rect x="355" y="80" width="220" height="48" rx="5" fill="#111" stroke="#666" stroke-width="1.2" stroke-dasharray="4,2"/>
+      <text x="465" y="104" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="9">adsb.lol globe_history</text>
+      <text x="465" y="118" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="9">daily tarballs (external download)</text>
+      </g>
+      <a href="#stage-2-1-ingest" class="stage-link">
+      <rect x="370" y="158" width="190" height="76" rx="5" fill="#2a1c0e" stroke="#cc8844" stroke-width="2"/>
+      <text x="465" y="182" text-anchor="middle" fill="#e0e0e0" font-family="Helvetica,sans-serif" font-size="11" font-weight="bold">2.1 ingest</text>
+      <text x="465" y="196" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11">download, filter to US military,</text>
+      <text x="465" y="210" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">downsample, write per-date</text>
+      <text x="465" y="224" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">(idempotent, resumable)</text>
+      </a>
+      <g class="data-node">
+      <rect x="360" y="264" width="210" height="62" rx="5" fill="#1a120a" stroke="#cc8844" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="465" y="288" text-anchor="middle" fill="#cc8844" font-family="Helvetica,sans-serif" font-size="10">raw traces</text>
+      <text x="465" y="302" text-anchor="middle" fill="#cc8844" font-family="Helvetica,sans-serif" font-size="10">date=*/trace.parquet + aircraft.parquet</text>
+      <text x="465" y="316" text-anchor="middle" fill="#cc8844" font-family="Helvetica,sans-serif" font-size="10" opacity="0.65">lat, lon, alt, speed, ts per day</text>
+      </g>
+      <g class="data-node">
+      <rect x="595" y="80" width="220" height="48" rx="5" fill="#111" stroke="#666" stroke-width="1.2" stroke-dasharray="4,2"/>
+      <text x="705" y="104" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="9">aircraft database snapshots (CSV, JSON)</text>
+      <text x="705" y="118" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="9">OpenSky, ICAO doc8643, overrides</text>
+      </g>
+      <a href="#stage-1-types" class="stage-link">
+      <rect x="610" y="158" width="190" height="76" rx="5" fill="#14283a" stroke="#6a9acc" stroke-width="2"/>
+      <text x="705" y="182" text-anchor="middle" fill="#e0e0e0" font-family="Helvetica,sans-serif" font-size="11" font-weight="bold">3.1 types</text>
+      <text x="705" y="196" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11">look up each aircraft's model,</text>
+      <text x="705" y="210" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">manufacturer, and role group</text>
+      <text x="705" y="224" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">(tanker, transport, ISR, rotary ...)</text>
+      </a>
+      <g class="data-node">
+      <rect x="600" y="264" width="210" height="76" rx="5" fill="#111" stroke="#6a9acc" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="705" y="288" text-anchor="middle" fill="#6a9acc" font-family="Helvetica,sans-serif" font-size="10">aircraft.parquet</text>
+      <text x="705" y="302" text-anchor="middle" fill="#6a9acc" font-family="Helvetica,sans-serif" font-size="10">icao24, type_code, roles, rotary, excluded,</text>
+      <text x="705" y="316" text-anchor="middle" fill="#6a9acc" font-family="Helvetica,sans-serif" font-size="10" opacity="0.65">desc, type_source, type_status</text>
+      <text x="705" y="330" text-anchor="middle" fill="#6a9acc" font-family="Helvetica,sans-serif" font-size="10" opacity="0.65">rotary_source, in_bbox</text>
+      </g>
+      <a href="#stage-2-denoise" class="stage-link">
+      <rect x="610" y="370" width="190" height="76" rx="5" fill="#14283a" stroke="#6a9acc" stroke-width="2"/>
+      <text x="705" y="394" text-anchor="middle" fill="#e0e0e0" font-family="Helvetica,sans-serif" font-size="11" font-weight="bold">3.2 denoise</text>
+      <text x="705" y="408" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11">flag position reports that are</text>
+      <text x="705" y="422" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">statistical outliers (MLAT noise,</text>
+      <text x="705" y="436" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">impossible jumps)</text>
+      </a>
+      <g class="data-node">
+      <rect x="600" y="476" width="210" height="48" rx="5" fill="#111" stroke="#6a9acc" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="705" y="500" text-anchor="middle" fill="#6a9acc" font-family="Helvetica,sans-serif" font-size="10">exclusions.parquet</text>
+      <text x="705" y="514" text-anchor="middle" fill="#6a9acc" font-family="Helvetica,sans-serif" font-size="10">icao24, ts_s</text>
+      </g>
+      <a href="#stage-3-partition" class="stage-link">
+      <rect x="870" y="90" width="190" height="76" rx="5" fill="#142a1e" stroke="#5abba0" stroke-width="2"/>
+      <text x="965" y="114" text-anchor="middle" fill="#e0e0e0" font-family="Helvetica,sans-serif" font-size="11" font-weight="bold">4.1 partition</text>
+      <text x="965" y="128" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11">divide each aircraft's timeline</text>
+      <text x="965" y="142" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">into ground, airborne, and no signal</text>
+      <text x="965" y="156" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">(15-min minimum for a blackout)</text>
+      </a>
+      <g class="data-node">
+      <rect x="840" y="196" width="210" height="62" rx="5" fill="#111" stroke="#5abba0" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="945" y="220" text-anchor="middle" fill="#5abba0" font-family="Helvetica,sans-serif" font-size="10">blackouts.parquet</text>
+      <text x="945" y="234" text-anchor="middle" fill="#5abba0" font-family="Helvetica,sans-serif" font-size="10">icao24, interval_id, gap_s, gc_km,</text>
+      <text x="945" y="248" text-anchor="middle" fill="#5abba0" font-family="Helvetica,sans-serif" font-size="10" opacity="0.65">pre/post: ts, lat, lon</text>
+      </g>
+      <g class="data-node">
+      <rect x="1070" y="196" width="210" height="62" rx="5" fill="#111" stroke="#5abba0" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="1175" y="220" text-anchor="middle" fill="#5abba0" font-family="Helvetica,sans-serif" font-size="10">intervals.parquet</text>
+      <text x="1175" y="234" text-anchor="middle" fill="#5abba0" font-family="Helvetica,sans-serif" font-size="10">icao24, kind, interval_id, start_ts, end_ts,</text>
+      <text x="1175" y="248" text-anchor="middle" fill="#5abba0" font-family="Helvetica,sans-serif" font-size="10" opacity="0.65">n_ground, n_air, n_off</text>
+      </g>
+      <a href="#stage-4-edge" class="stage-link">
+      <rect x="870" y="288" width="190" height="76" rx="5" fill="#142a1e" stroke="#5abba0" stroke-width="2"/>
+      <text x="965" y="312" text-anchor="middle" fill="#e0e0e0" font-family="Helvetica,sans-serif" font-size="11" font-weight="bold">4.2 edge</text>
+      <text x="965" y="326" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11">measure speed, altitude, heading</text>
+      <text x="965" y="340" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">at both ends of each blackout</text>
+      <text x="965" y="354" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">(120-s boundary window)</text>
+      </a>
+      <g class="data-node">
+      <rect x="860" y="394" width="210" height="90" rx="5" fill="#111" stroke="#5abba0" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="965" y="418" text-anchor="middle" fill="#5abba0" font-family="Helvetica,sans-serif" font-size="10">edges.parquet</text>
+      <text x="965" y="432" text-anchor="middle" fill="#5abba0" font-family="Helvetica,sans-serif" font-size="10">icao24, interval_id, impl_kph, tc</text>
+      <text x="965" y="446" text-anchor="middle" fill="#5abba0" font-family="Helvetica,sans-serif" font-size="10" opacity="0.65">pre/post: alt_ft, gs_kt, track_deg, vert_rate_fpm,</text>
+      <text x="965" y="460" text-anchor="middle" fill="#5abba0" font-family="Helvetica,sans-serif" font-size="10" opacity="0.65">pre/post: ts, lat, lon, source</text>
+      <text x="965" y="474" text-anchor="middle" fill="#5abba0" font-family="Helvetica,sans-serif" font-size="10" opacity="0.65">gap_s, gc_km, transatlantic_split</text>
+      </g>
+      <a href="#stage-5-split" class="stage-link">
+      <rect x="870" y="514" width="190" height="62" rx="5" fill="#142a1e" stroke="#5abba0" stroke-width="2"/>
+      <text x="965" y="538" text-anchor="middle" fill="#e0e0e0" font-family="Helvetica,sans-serif" font-size="11" font-weight="bold">4.3 split</text>
+      <text x="965" y="552" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11">decide whether each blackout is</text>
+      <text x="965" y="566" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">mid-flight (join) or between flights</text>
+      </a>
+      <g class="data-node">
+      <rect x="840" y="606" width="210" height="62" rx="5" fill="#111" stroke="#5abba0" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="945" y="630" text-anchor="middle" fill="#5abba0" font-family="Helvetica,sans-serif" font-size="10">verdicts.parquet</text>
+      <text x="945" y="644" text-anchor="middle" fill="#5abba0" font-family="Helvetica,sans-serif" font-size="10">icao24, interval_id, verdict,</text>
+      <text x="945" y="658" text-anchor="middle" fill="#5abba0" font-family="Helvetica,sans-serif" font-size="10" opacity="0.65">pre_ts</text>
+      </g>
+      <a href="#stage-6-flight" class="stage-link">
+      <rect x="1070" y="606" width="190" height="62" rx="5" fill="#142a1e" stroke="#5abba0" stroke-width="2"/>
+      <text x="1165" y="630" text-anchor="middle" fill="#e0e0e0" font-family="Helvetica,sans-serif" font-size="11" font-weight="bold">4.4 flight</text>
+      <text x="1165" y="644" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11">chain intervals + verdicts</text>
+      <text x="1165" y="658" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">into continuous flights</text>
+      </a>
+      <a href="#stage-7-train" class="stage-link">
+      <rect x="360" y="778" width="190" height="76" rx="5" fill="#2e2214" stroke="#ccaa55" stroke-width="2"/>
+      <text x="455" y="802" text-anchor="middle" fill="#e0e0e0" font-family="Helvetica,sans-serif" font-size="11" font-weight="bold">5.1 train</text>
+      <text x="455" y="816" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11">train a Bayesian model to</text>
+      <text x="455" y="830" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">attribute landings to airports</text>
+      <text x="455" y="844" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">(edge profiles + airport proximity)</text>
+      </a>
+      <g class="data-node">
+      <rect x="350" y="884" width="210" height="48" rx="5" fill="#111" stroke="#ccaa55" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="455" y="908" text-anchor="middle" fill="#ccaa55" font-family="Helvetica,sans-serif" font-size="10">attribution_model.pkl</text>
+      <text x="455" y="922" text-anchor="middle" fill="#ccaa55" font-family="Helvetica,sans-serif" font-size="10">scikit-learn posterior weights</text>
+      </g>
+      <a href="#stage-8-attribute" class="stage-link">
+      <rect x="360" y="962" width="190" height="76" rx="5" fill="#2e2214" stroke="#ccaa55" stroke-width="2"/>
+      <text x="455" y="986" text-anchor="middle" fill="#e0e0e0" font-family="Helvetica,sans-serif" font-size="11" font-weight="bold">5.2 attribute</text>
+      <text x="455" y="1000" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11">assign each flight's origin and</text>
+      <text x="455" y="1014" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">destination; record per-aircraft</text>
+      <text x="455" y="1028" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">daily sightings per country</text>
+      </a>
+      <g class="data-node">
+      <rect x="600" y="948" width="210" height="90" rx="5" fill="#111" stroke="#ccaa55" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="705" y="972" text-anchor="middle" fill="#ccaa55" font-family="Helvetica,sans-serif" font-size="10">landings.parquet</text>
+      <text x="705" y="986" text-anchor="middle" fill="#ccaa55" font-family="Helvetica,sans-serif" font-size="10">icao24, field, cc, tier, log_odds, origin,</text>
+      <text x="705" y="1000" text-anchor="middle" fill="#ccaa55" font-family="Helvetica,sans-serif" font-size="10" opacity="0.65">t_arrival, t_departure, merged_n</text>
+      <text x="705" y="1014" text-anchor="middle" fill="#ccaa55" font-family="Helvetica,sans-serif" font-size="10" opacity="0.65">override (bool), contradictory (bool)</text>
+      <text x="705" y="1028" text-anchor="middle" fill="#ccaa55" font-family="Helvetica,sans-serif" font-size="10" opacity="0.65">field_log, country_log</text>
+      </g>
+      <g class="data-node">
+      <rect x="600" y="1068" width="210" height="48" rx="5" fill="#111" stroke="#ccaa55" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="705" y="1092" text-anchor="middle" fill="#ccaa55" font-family="Helvetica,sans-serif" font-size="10">sighting_times.parquet</text>
+      <text x="705" y="1106" text-anchor="middle" fill="#ccaa55" font-family="Helvetica,sans-serif" font-size="10">icao24, day, cc, first_ts, last_ts</text>
+      </g>
+      <g class="data-node">
+      <rect x="350" y="1068" width="210" height="90" rx="5" fill="#111" stroke="#ccaa55" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="455" y="1092" text-anchor="middle" fill="#ccaa55" font-family="Helvetica,sans-serif" font-size="10">flights.parquet</text>
+      <text x="455" y="1106" text-anchor="middle" fill="#ccaa55" font-family="Helvetica,sans-serif" font-size="10">icao24, flight_id, type_code, t_start, t_end</text>
+      <text x="455" y="1120" text-anchor="middle" fill="#ccaa55" font-family="Helvetica,sans-serif" font-size="10" opacity="0.65">origin/dest: icao, country, grounded</text>
+      <text x="455" y="1134" text-anchor="middle" fill="#ccaa55" font-family="Helvetica,sans-serif" font-size="10" opacity="0.65">traversed_countries, roles, th_chain, th_ever,</text>
+      <text x="455" y="1148" text-anchor="middle" fill="#ccaa55" font-family="Helvetica,sans-serif" font-size="10" opacity="0.65">start/end: lat, lon; max_alt_ft, total_path_km</text>
+      </g>
+      <a href="#stage-9-theater" class="stage-link">
+      <rect x="360" y="1188" width="190" height="76" rx="5" fill="#2e2214" stroke="#ccaa55" stroke-width="2"/>
+      <text x="455" y="1212" text-anchor="middle" fill="#e0e0e0" font-family="Helvetica,sans-serif" font-size="11" font-weight="bold">5.3 theater</text>
+      <text x="455" y="1226" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11">flag flights that form mission</text>
+      <text x="455" y="1240" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">chains to the Middle East theater</text>
+      <text x="455" y="1254" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">(th_chain, th_ever columns)</text>
+      </a>
+      <a href="#stage-10-trace" class="stage-link">
+      <rect x="940" y="778" width="190" height="76" rx="5" fill="#28142e" stroke="#aa66aa" stroke-width="2"/>
+      <text x="1035" y="802" text-anchor="middle" fill="#e0e0e0" font-family="Helvetica,sans-serif" font-size="11" font-weight="bold">6.1 trace</text>
+      <text x="1035" y="816" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11">simplify flight paths for the</text>
+      <text x="1035" y="830" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">map using Ramer-Douglas-Peucker</text>
+      <text x="1035" y="844" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">(2 km tolerance)</text>
+      </a>
+      <g class="data-node">
+      <rect x="930" y="884" width="210" height="48" rx="5" fill="#111" stroke="#aa66aa" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="1035" y="908" text-anchor="middle" fill="#aa66aa" font-family="Helvetica,sans-serif" font-size="10">traces.parquet</text>
+      <text x="1035" y="922" text-anchor="middle" fill="#aa66aa" font-family="Helvetica,sans-serif" font-size="10">flight_id, pts_coarse (polylines)</text>
+      </g>
+      <a href="#stage-11-export" class="stage-link">
+      <rect x="940" y="962" width="190" height="76" rx="5" fill="#28142e" stroke="#aa66aa" stroke-width="2"/>
+      <text x="1035" y="986" text-anchor="middle" fill="#e0e0e0" font-family="Helvetica,sans-serif" font-size="11" font-weight="bold">6.2 export</text>
+      <text x="1035" y="1000" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11">write the static site data bundle:</text>
+      <text x="1035" y="1014" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">GeoJSON traces, flight metadata,</text>
+      <text x="1035" y="1028" text-anchor="middle" fill="#888" font-family="Helvetica,sans-serif" font-size="11" opacity="0.65">stats, landing maps</text>
+      </a>
+      <g class="data-node">
+      <rect x="930" y="1068" width="210" height="48" rx="5" fill="#111" stroke="#aa66aa" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="1035" y="1092" text-anchor="middle" fill="#aa66aa" font-family="Helvetica,sans-serif" font-size="10">data/out/</text>
+      <text x="1035" y="1106" text-anchor="middle" fill="#aa66aa" font-family="Helvetica,sans-serif" font-size="10">JSON, GeoJSON, HTML (site bundle)</text>
+      </g>
+      <path d="M165,121 L165,159" fill="none" stroke="#666" stroke-width="1.5" marker-end="url(#ah)"/>
+      <path d="M165,213 L165,251" fill="none" stroke="#cc5555" stroke-width="1.5" marker-end="url(#ah-red)"/>
+      <path d="M165,397 L165,435" fill="none" stroke="#666" stroke-width="1.5" marker-end="url(#ah)"/>
+      <path d="M165,489 L165,527" fill="none" stroke="#cc5555" stroke-width="1.5" marker-end="url(#ah-red)"/>
+      <path d="M165,673 L165,711" fill="none" stroke="#666" stroke-width="1.5" marker-end="url(#ah)"/>
+      <path d="M52,646 C4,646 19,922 67,922" fill="none" stroke="#666" stroke-width="1.5" marker-end="url(#ah)"/>
+      <path d="M165,765 L165,803" fill="none" stroke="#cc5555" stroke-width="1.5" marker-end="url(#ah-red)"/>
+      <path d="M165,949 L165,987" fill="none" stroke="#cc5555" stroke-width="1.5" marker-end="url(#ah-red)"/>
+      <path d="M165,1119 L165,1157" fill="none" stroke="#666" stroke-width="1.5" marker-end="url(#ah)"/>
+      <path d="M165,1225 L165,1263" fill="none" stroke="#cc5555" stroke-width="1.5" marker-end="url(#ah-red)"/>
+      <path d="M465,131 L465,155" fill="none" stroke="#666" stroke-width="1.5" marker-end="url(#ah)"/>
+      <path d="M465,237 L465,261" fill="none" stroke="#cc8844" stroke-width="1.5" marker-end="url(#ah-orange)"/>
+      <path d="M705,131 L705,155" fill="none" stroke="#666" stroke-width="1.5" marker-end="url(#ah)"/>
+      <path d="M705,237 L705,261" fill="none" stroke="#6a9acc" stroke-width="1.5" marker-end="url(#ah-blue)"/>
+      <path d="M705,343 L705,367" fill="none" stroke="#6a9acc" stroke-width="1.5" marker-end="url(#ah-blue)"/>
+      <path d="M705,449 L705,473" fill="none" stroke="#6a9acc" stroke-width="1.5" marker-end="url(#ah-blue)"/>
+      <path d="M965,169 L945,193" fill="none" stroke="#5abba0" stroke-width="1.5" marker-end="url(#ah-green)"/>
+      <path d="M1018,169 C1018,181 1175,181 1175,193" fill="none" stroke="#5abba0" stroke-width="1.5" marker-end="url(#ah-green)"/>
+      <path d="M945,261 L965,285" fill="none" stroke="#5abba0" stroke-width="1.5" marker-end="url(#ah-green)"/>
+      <path d="M965,367 L965,391" fill="none" stroke="#5abba0" stroke-width="1.5" marker-end="url(#ah-green)"/>
+      <path d="M965,487 L965,511" fill="none" stroke="#5abba0" stroke-width="1.5" marker-end="url(#ah-green)"/>
+      <path d="M965,579 L945,603" fill="none" stroke="#5abba0" stroke-width="1.5" marker-end="url(#ah-green)"/>
+      <path d="M1053,637 C1060,637 1060,637 1067,637" fill="none" stroke="#5abba0" stroke-width="1.5" marker-end="url(#ah-green)"/>
+      <path d="M1175,261 L1165,603" fill="none" stroke="#5abba0" stroke-width="1.5" marker-end="url(#ah-green)"/>
+      <path d="M455,857 L455,881" fill="none" stroke="#ccaa55" stroke-width="1.5" marker-end="url(#ah-amber)"/>
+      <path d="M455,935 L455,959" fill="none" stroke="#ccaa55" stroke-width="1.5" marker-end="url(#ah-amber)"/>
+      <path d="M553,979 C575,979 575,993 597,993" fill="none" stroke="#ccaa55" stroke-width="1.5" marker-end="url(#ah-amber)"/>
+      <path d="M553,1021 C575,1021 575,1092 597,1092" fill="none" stroke="#ccaa55" stroke-width="1.5" marker-end="url(#ah-amber)"/>
+      <path d="M455,1041 L455,1065" fill="none" stroke="#eebb55" stroke-width="1.5" marker-end="url(#ah-gold)"/>
+      <path d="M455,1161 L455,1185" fill="none" stroke="#eebb55" stroke-width="1.5" marker-end="url(#ah-gold)"/>
+      <path d="M1035,857 L1035,881" fill="none" stroke="#aa66aa" stroke-width="1.5" marker-end="url(#ah-purple)"/>
+      <path d="M1035,935 L1035,959" fill="none" stroke="#aa66aa" stroke-width="1.5" marker-end="url(#ah-purple)"/>
+      <path d="M1035,1041 L1035,1065" fill="none" stroke="#aa66aa" stroke-width="1.5" marker-end="url(#ah-purple)"/>
+      <path d="M273,265 C320,265 320,196 367,196" fill="none" stroke="#cc5555" stroke-width="1.5" marker-end="url(#ah-red)"/>
+      <text x="326" y="236" fill="#cc5555" font-family="Helvetica,sans-serif" font-size="9" font-style="italic">filter list</text>
+      <path d="M273,291 C440,291 440,175 607,175" fill="none" stroke="#cc5555" stroke-width="1.5" marker-end="url(#ah-red)"/>
+      <text x="443" y="241" fill="#cc5555" font-family="Helvetica,sans-serif" font-size="9" font-style="italic">is_relevant</text>
+      <path d="M165,1079 C165,658 652,658 652,237" fill="none" stroke="#cc5555" stroke-width="1.5" marker-end="url(#ah-red)"/>
+      <text x="417" y="661" fill="#cc5555" font-family="Helvetica,sans-serif" font-size="9" font-style="italic">taxonomy()</text>
+      <path d="M273,541 C315,541 315,795 357,795" fill="none" stroke="#cc5555" stroke-width="1.5" marker-end="url(#ah-red)"/>
+      <path d="M273,817 C315,817 315,837 357,837" fill="none" stroke="#cc5555" stroke-width="1.5" marker-end="url(#ah-red)"/>
+      <path d="M273,554 C315,554 315,979 357,979" fill="none" stroke="#cc5555" stroke-width="1.5" marker-end="url(#ah-red)"/>
+      <path d="M273,830 C315,830 315,1021 357,1021" fill="none" stroke="#cc5555" stroke-width="1.5" marker-end="url(#ah-red)"/>
+      <path d="M273,567 C605,567 605,979 937,979" fill="none" stroke="#cc5555" stroke-width="1.5" marker-end="url(#ah-red)"/>
+      <path d="M273,843 C605,843 605,985 937,985" fill="none" stroke="#cc5555" stroke-width="1.5" marker-end="url(#ah-red)"/>
+      <path d="M273,1014 C605,1014 605,997 937,997" fill="none" stroke="#cc5555" stroke-width="1.5" marker-end="url(#ah-red)"/>
+      <path d="M273,1283 C605,1283 605,1021 937,1021" fill="none" stroke="#cc5555" stroke-width="1.5" marker-end="url(#ah-red)"/>
+      <path d="M278,1099 C608,1099 608,1009 937,1009" fill="none" stroke="#cc5555" stroke-width="1.5" marker-end="url(#ah-red)"/>
+      <text x="609" y="1062" fill="#cc5555" font-family="Helvetica,sans-serif" font-size="9" font-style="italic">taxonomy()</text>
+      <path d="M573,312 C590,312 590,217 607,217" fill="none" stroke="#cc8844" stroke-width="1.5" marker-end="url(#ah-orange)"/>
+      <path d="M813,500 C840,500 840,149 867,149" fill="none" stroke="#6a9acc" stroke-width="1.5" marker-end="url(#ah-blue)"/>
+      <path d="M813,302 C889,302 965,-20 965,87" fill="none" stroke="#6a9acc" stroke-width="1.5" marker-end="url(#ah-blue)"/>
+      <path d="M573,278 C720,278 720,107 867,107" fill="none" stroke="#cc8844" stroke-width="1.5" marker-end="url(#ah-orange)"/>
+      <path d="M465,329 L455,775" fill="none" stroke="#cc8844" stroke-width="1.5" marker-end="url(#ah-orange)"/>
+      <path d="M646,343 C646,559 508,559 508,775" fill="none" stroke="#6a9acc" stroke-width="1.5" marker-end="url(#ah-blue)"/>
+      <path d="M597,500 C575,500 575,816 553,816" fill="none" stroke="#6a9acc" stroke-width="1.5" marker-end="url(#ah-blue)"/>
+      <path d="M1165,671 C1165,868 514,868 514,1065" fill="none" stroke="#eebb55" stroke-width="2.0" marker-end="url(#ah-gold)"/>
+      <path d="M563,1088 C750,1088 750,816 937,816" fill="none" stroke="#eebb55" stroke-width="1.5" marker-end="url(#ah-gold)"/>
+      <path d="M563,1138 C750,1138 750,1015 937,1015" fill="none" stroke="#eebb55" stroke-width="1.5" marker-end="url(#ah-gold)"/>
+      <path d="M813,993 C875,993 875,991 937,991" fill="none" stroke="#ccaa55" stroke-width="1.5" marker-end="url(#ah-amber)"/>
+      <path d="M813,1092 C875,1092 875,1003 937,1003" fill="none" stroke="#ccaa55" stroke-width="1.5" marker-end="url(#ah-amber)"/>
+      <path d="M480,1065 L478,1041" fill="none" stroke="#eebb55" stroke-width="2.5" stroke-dasharray="12,6" marker-end="url(#ah-gold)"/>
+      <text x="489" y="1050" fill="#eebb55" font-family="Helvetica,sans-serif" font-size="9" font-style="italic">write-back</text>
+      <path d="M478,1185 L480,1161" fill="none" stroke="#eebb55" stroke-width="2.5" stroke-dasharray="12,6" marker-end="url(#ah-gold)"/>
+      <text x="489" y="1172" fill="#eebb55" font-family="Helvetica,sans-serif" font-size="9" font-style="italic">write-back</text>
+      <line x1="15" y1="1304" x2="1365" y2="1304" stroke="#222" stroke-width="1"/>
+      <rect x="30" y="1324" width="46" height="16" rx="4" fill="#142a1e" stroke="#5abba0" stroke-width="2"/>
+      <text x="84" y="1336" fill="#aaa" font-family="Helvetica,sans-serif" font-size="10">processing stage</text>
+      <rect x="240" y="1324" width="46" height="16" rx="4" fill="#111" stroke="#5abba0" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="294" y="1336" fill="#aaa" font-family="Helvetica,sans-serif" font-size="10">data artifact</text>
+      <line x1="430" y1="1332" x2="470" y2="1332" stroke="#5abba0" stroke-width="1.5" marker-end="url(#ah-green)"/>
+      <text x="478" y="1336" fill="#aaa" font-family="Helvetica,sans-serif" font-size="10">data flow (color = source phase)</text>
+      </g>
+      </svg>
+    </div>
+
+
+    <!-- ============================================================
+         OVERVIEW
+         ============================================================ -->
+    <section id="panel-overview">
+
+      <h2 id="in-brief">In brief</h2>
+      <p>This site maps US military flights in and around Europe, the Middle East and North Africa. It does so using only public radio signals that aircraft broadcast about themselves and that volunteers collect. It shows which countries&rsquo; airspace those flights crossed, where the aircraft landed, and, in Refusal mode, how many flights would have been affected had a country refused passage from a chosen date.</p>
+      <p>The data is processed in six phases, described in order under <a href="#data-processing">Data processing</a>:</p>
+      <ol>
+        <li><strong>Generate:</strong> build the reference databases&mdash;military aircraft identifiers, airports, country boundaries, and role definitions.</li>
+        <li><strong>Ingest:</strong> download daily position-report archives, filter to US military aircraft, and write per-date traces.</li>
+        <li><strong>Preprocess:</strong> resolve each aircraft&rsquo;s type and role, then flag position reports that are statistical outliers.</li>
+        <li><strong>Timeline:</strong> turn each aircraft&rsquo;s stream of position reports into separate flights, deciding where one ends and the next begins.</li>
+        <li><strong>Landing:</strong> work out which countries each flight crossed and where aircraft landed.</li>
+        <li><strong>Publish:</strong> write the files this website loads.</li>
+      </ol>
+      <p>One caution applies to everything here. The analysis sees only what aircraft transmit and what receivers hear. Military aircraft sometimes turn their transponders off, and receiver coverage is uneven, so every count on this site is a lower bound, never an exact total. Unfamiliar terms are defined where they first appear and again in the Glossary.</p>
+
+      <h2 id="how-aircraft-are-tracked">How aircraft are tracked</h2>
+      <p>Aircraft broadcast their position, altitude, speed and identity by radio on 1090 MHz, using a device called a transponder. The broadcast system is called ADS-B (Automatic Dependent Surveillance-Broadcast). The signals are unencrypted, so anyone with an antenna can receive them. Each broadcast the pipeline keeps is called a <em>position report</em> (or <em>point</em>), and the time-ordered reports from one aircraft are its <em>trace</em>.</p>
+      <p>Volunteers run receivers all over the world and pool what they hear. This site uses the daily archives published by <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a>, one such community aggregator.</p>
+
+      <h2 id="data-sources">Data sources</h2>
+      <p><strong>Basemap.</strong> &copy; <a href="https://carto.com/about-carto/" target="_blank" rel="noopener">CARTO</a>, &copy; <a href="http://www.openstreetmap.org/about/" target="_blank" rel="noopener">OpenStreetMap</a> contributors. Credited here as well as on the map, so the credit does not depend on an on-map control that other elements can cover.</p>
+      <p>Each position report carries a <em>source</em> field saying how the position was determined. Four sources appear:</p>
+      <dl class="def-list">
+        <dt>ADS-B (<code>adsb_icao</code>), ~80% of reports</dt>
+        <dd>The aircraft broadcasts its own GPS position. Accurate to metres.</dd>
+        <dt>MLAT (<code>mlat</code>, multilateration), ~19%</dt>
+        <dd>Several ground receivers estimate a position from arrival-time differences. Degrades with distance and geometry. Produces ~48x more impossible jumps per report than ADS-B, and almost all slow mislocations: positions a few kilometres off, too gradual to trip any speed test, but enough to put a report on the wrong side of a border. About 97% of correctable anomalies in the analysis region are MLAT.</dd>
+        <dt>TIS-B (<code>tisb_icao</code>)</dt>
+        <dd>A ground station rebroadcasts radar-derived positions. Radar-grade, not GPS-grade. Rare here.</dd>
+        <dt>ADS-R (<code>adsr_icao</code>), ~0.4%</dt>
+        <dd>A ground station relays ADS-B between the 1090 MHz frequency and 978 MHz (used by some small aircraft, called UAT). GPS-derived, same accuracy as direct ADS-B.</dd>
+      </dl>
+      <p>All four pass through the same pipeline and the same outlier filter (see <a href="#phase-preprocess">Denoise</a>). MLAT is kept because it is often the only coverage in eastern Europe and over the Mediterranean. The filter removes fast jumps; it cannot remove slow mislocations, so some weakly supported border crossings remain. See <a href="#limitations">Limitations</a>.</p>
+
+      <h2 id="aircraft-identification">Aircraft identification</h2>
+      <p>Every aircraft on this site is identified as US military by its ICAO24 address, the 24-bit code (written as six hexadecimal digits) that every transponder message carries and that is assigned to one airframe. ICAO is the International Civil Aviation Organization. An address qualifies in one of two ways:</p>
+      <ul>
+        <li>It falls in <code>ADF7C8&ndash;AFFFFF</code>, the part of the US allocation (<code>A00000&ndash;AFFFFF</code>) outside the civil registry. The lower bound is arithmetic, not a published designation. The FAA gives every possible civil registration (N-number) a Mode S address in sequence, starting at <code>A00001</code> for N1. An N-number is one to five characters after the N: a number from 1 to 99999 with no leading zero, optionally followed by one or two letters (24 are usable, since I and O are excluded), never more than five characters in all. Counting every form:
+          <table class="param-table">
+            <tr><th>Digits</th><th>Numbers</th><th>Letter suffixes allowed</th><th>Registrations</th></tr>
+            <tr><td>1</td><td>9</td><td>none, one or two: 1 + 24 + 576 = 601</td><td>5,409</td></tr>
+            <tr><td>2</td><td>90</td><td>601</td><td>54,090</td></tr>
+            <tr><td>3</td><td>900</td><td>601</td><td>540,900</td></tr>
+            <tr><td>4</td><td>9,000</td><td>none or one: 1 + 24 = 25</td><td>225,000</td></tr>
+            <tr><td>5</td><td>90,000</td><td>none: 1</td><td>90,000</td></tr>
+            <tr><td colspan="3">Total</td><td>915,399</td></tr>
+          </table>
+          915,399 in hexadecimal is <code>DF7C7</code>, so the last civil address is <code>A00000 + DF7C7 = ADF7C7</code> (N99999), and <code>ADF7C8</code> is the first address that no N-number can map to. The registries agree: <code>ADF7C0</code> to <code>ADF7C7</code> hold N99992 to N99999, all registered to private owners. Above <code>ADF7C7</code> the addresses are assigned outside the civil scheme to US government aircraft. The sub-allocation is not published, so what flies there is known only empirically: the addresses in this range that either registry identifies carry armed-forces serials, with a small number belonging to the Coast Guard and to Customs and Border Protection. The readsb decoder uses the same boundary. The derivation therefore proves where the civil registry ends, not that every address above it is military; the latter is an observation, and the small non-military share is accepted as the cost of keeping the in-range aircraft that no database knows about.</li>
+        <li>It sits in the civil part of the US block and is flagged military by either the Mictronics database or the ADS-B Exchange <code>basic-ac-db</code> <code>mil</code> flag.</li>
+      </ul>
+      <p>This fixed test is used instead of the per-day military bit adsb.lol attaches to each record. The two were compared once on a larger dataset when the pipeline was designed, and agreed. The comparison is not repeated on each update. The advantage is that nobody reproducing these results has to decompress every daily archive to recompute the live bit.</p>
+      <p>Callsigns, routes, owners and operators play no part. A civilian contractor flying under military charter is not counted.</p>
+
+      <h2 id="reference-datasets">Reference datasets</h2>
+      <ul>
+        <li><strong>Aircraft registries</strong> (four, used to resolve type codes): the OpenSky-format database from <a href="https://www.adsb.lol/data/" target="_blank" rel="noopener">adsb.lol</a>, <a href="https://www.mictronics.de/aircraft-database/" target="_blank" rel="noopener">Mictronics</a>, <a href="https://github.com/sdr-enthusiasts/plane-alert-db" target="_blank" rel="noopener">plane-alert-db</a>, and ADS-B Exchange <code>basic-ac-db</code>. Mictronics and basic-ac-db also supply the military flags above.</li>
+        <li><strong>ICAO DOC 8643</strong>, the official list of aircraft type designators (the short codes such as C17 or KC135 that name an aircraft model). Used to validate type codes and to recognise rotorcraft.</li>
+        <li><strong><a href="https://ourairports.com/" target="_blank" rel="noopener">OurAirports</a></strong> for airfield coordinates, types and elevations, supplemented by military airfields from <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a>. See <a href="#landings">Landings</a>.</li>
+        <li><strong><a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a></strong> 1:10m country boundaries, for the country raster and map outlines.</li>
+      </ul>
+
+      <h2 id="geographic-scope">Geographic scope</h2>
+      <p>A bounding box from 9&deg;N to 73&deg;N and 31&deg;W to 66&deg;E defines the scope. It covers Europe, North Africa and the Middle East. An aircraft is processed only if at least one of its position reports falls inside the box. A flight is kept only if at least one of its own points does. A flight from the US to Qatar is included because it passes through the box; flights with no point inside it appear nowhere.</p>
+
+      <h2 id="data-window">Data window &amp; dates</h2>
+      <!-- Hardcoded snapshot of the current data window (26 Feb 2026 - 16 Apr 2026).
+           Update this section when the covered window changes. -->
+      <p>The dataset covers <strong>26 February 2026 through 16 April 2026</strong>, all times UTC. The Refusal mode allows you to explore different dates of refusal, but defaults to a denial date of <strong>28 February 2026</strong>.</p>
+      <p>The window is set by the war it documents. The 2026 US&ndash;Israeli war on Iran and Lebanon began overnight between 20:00 UTC on 27 February and the following morning, so 28 February is the default counterfactual date. The data begins two days earlier to capture flights in the immediate run-up.</p>
+      <p>After days of mediation, at 21:50 UTC on 7 April Pakistani PM Sharif tweeted that &ldquo;Iran and the United States of America, along with their allies, have agreed to an immediate ceasefire everywhere including Lebanon and elsewhere, EFFECTIVE IMMEDIATELY.&rdquo; The US President posted at 05:08 that &ldquo;THE CEASEFIRE IS NOW IN EFFECT. PLEASE DO NOT VIOLATE IT!&rdquo;</p>
+      <p>Then, between roughly 11:00 and 12:00 UTC on 8 April, Israel bombed Beirut and Lebanon, killing over 350 people &mdash; a day now known as Black Wednesday. The US made no public statement excluding Lebanon from the ceasefire until after those strikes, and only then denied that Lebanon had been included. Hezbollah&rsquo;s last verifiable attack had been at 20:20 UTC on 7 April, more than an hour before the ceasefire was declared.</p>
+      <p>Iran reclosed the Strait of Hormuz and the war resumed. A second ceasefire &mdash; this one with the US acknowledging Lebanon was included &mdash; was scheduled for 21:00 UTC on 16 April. We close the dataset there to keep it small and fast to serve.</p>
+      <p>The war did not stop. Fighting continues intermittently, and the Israeli military&rsquo;s occupation and daily bombardment of Lebanon continues &mdash; supplied in large part by US weapons and materiel that transit European airspace, which is what this site tracks.</p>
+    </section>
+
+    <!-- ============================================================
+         THE PIPELINE
+         ============================================================ -->
+    <section id="panel-data">
+
+      <h2 id="data-processing">Data processing</h2>
+      <p>The source is the <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a> daily archive of every position report its receivers logged. Archives are downloaded in bulk, not streamed live, and run through a fixed pipeline. Each stage reads the previous stage's output and writes its own, so any stage can be re-run alone.</p>
+      <p>The pipeline has seventeen steps in the six phases outlined <a href="#in-brief">above</a>, numbered as in the diagram. What follows describes each step in order. The vocabulary is small: a <em>report</em> is one received position; a <em>flight</em> is one continuous airborne trip; a <em>blackout</em> is a long silence in the middle of a flight (4.1 Partition); and a <em>landing</em> is one stay on the ground (see <a href="#landings">Landings</a>).</p>
+
+      <!-- ==================== PHASE 1: GENERATE ==================== -->
+      <h2 id="phase-generate">Phase 1: Generate</h2>
+      <div class="phase-crops">
+        <svg class="phase-crop" viewBox="7 42 316 633" role="img" aria-label="Pipeline diagram, 1. generate, part 1 of 2."><svg x="7" y="42" width="316" height="633" viewBox="7 42 316 633"><use href="#pipeline-all"/></svg></svg>
+        <svg class="phase-crop" viewBox="7 659 316 633" role="img" aria-label="Pipeline diagram, 1. generate, part 2 of 2."><svg x="7" y="659" width="316" height="633" viewBox="7 659 316 633"><use href="#pipeline-all"/></svg></svg>
+      </div>
+      <p>Build the reference data every later phase reads. These steps run rarely and depend only on public downloads and the project&rsquo;s own configuration.</p>
+
+      <h3 id="stage-1-1-mil">1.1 Mil: US military aircraft list</h3>
+      <p>Write the list of US military ICAO24 addresses (<code>mil_icao24.txt</code>) from the Mictronics and <code>basic-ac-db</code> military flags, using the test described under <a href="#aircraft-identification">Aircraft identification</a>. Ingest and Types both filter on this list.</p>
+
+      <h3 id="stage-1-2-airports">1.2 Airports: airfield database</h3>
+      <p>Combine OurAirports with military airfields from OpenStreetMap into one airfield table (<code>airports.pkl</code>) with name, coordinates, type and country. See <a href="#reference-datasets">Reference datasets</a> and <a href="#landings">Landings</a>.</p>
+
+      <h3 id="stage-1-3-raster">1.3 Raster: country grid</h3>
+      <p>Rasterise the Natural Earth country polygons into a 0.01-degree grid holding one country per cell (<code>airspace.npy</code>). Landing attribution and the export read this grid to turn a position into a country. See <a href="#geographic-scope">Geographic scope</a>.</p>
+
+      <h3 id="stage-1-4-boundaries">1.4 Boundaries: map outlines</h3>
+      <p>Simplify the same Natural Earth shapes into the focus-country outlines the map draws (<code>boundaries.geojson</code>).</p>
+
+      <h3 id="stage-1-5-roles">1.5 Roles: role taxonomy</h3>
+      <p>Generate the role taxonomy and the <a href="roles.html">Aircraft roles</a> reference page from <code>roles.json</code>. The Types stage (3.1) then uses this taxonomy to give each aircraft its role group; see <a href="#role-classification">Role classification</a>.</p>
+
+      <!-- ==================== PHASE 2: INGEST ==================== -->
+      <h2 id="phase-ingest">Phase 2: Ingest</h2>
+      <div class="phase-crops">
+        <svg class="phase-crop" viewBox="327 42 276 332" role="img" aria-label="Pipeline diagram, 2. ingest."><svg x="327" y="42" width="276" height="332" viewBox="327 42 276 332"><use href="#pipeline-all"/></svg></svg>
+      </div>
+
+      <h3 id="stage-2-1-ingest">2.1 Ingest</h3>
+      <p>A download step comes first. For each day it extracts per-aircraft traces, keeps only aircraft that pass the identification test above, and thins the points: every report is bucketed into fixed 10-second windows and the first in each window is kept. Two survivors can sit much closer than 10 seconds apart, or nearly 20 seconds apart, depending on when the original reports fell. All four source types are kept.</p>
+
+      <!-- ==================== PHASE 3: PREPROCESS ==================== -->
+      <h2 id="phase-preprocess">Phase 3: Preprocess</h2>
+      <div class="phase-crops">
+        <svg class="phase-crop" viewBox="562 42 286 530" role="img" aria-label="Pipeline diagram, 3. preprocess."><svg x="562" y="42" width="286" height="530" viewBox="562 42 286 530"><use href="#pipeline-all"/></svg></svg>
+      </div>
+      <p>Classify the fleet and scrub bad position reports before any flight assembly.</p>
+
+      <h3 id="stage-1-types">3.1 Types</h3>
+      <p>Resolve a type code (the ICAO designator naming the aircraft model, such as C17) for every aircraft. The four registries are layered in this order:</p>
+      <ol>
+        <li>Bulk database snapshots dated <strong>after</strong> the data window, newest first. These carry the most current knowledge and may correct errors that existed during the window.</li>
+        <li>The most recent non-null type that adsb.lol itself reported for the aircraft during the window (from daily records, not traces).</li>
+        <li>Bulk database snapshots dated <strong>before</strong> the end of the window, newest first. Stale, but better than nothing.</li>
+      </ol>
+      <p>Each layer fills only the blanks the previous ones left; it never overrides. Every candidate code is normalised (uppercase alphanumerics) and validated against ICAO DOC 8643 and the pipeline&rsquo;s own role taxonomy. An invalid code is rejected at its layer so a later source can fill the blank.</p>
+      <p>Last, a short, evidenced list of manual corrections wins unconditionally for the addresses it names.</p>
+      <p>The result for each aircraft is one of three statuses:</p>
+      <dl class="def-list">
+        <dt>resolved</dt>
+        <dd>A validated type code was found.</dd>
+        <dt>type_unknown</dt>
+        <dd>At least one candidate was observed across the layers, but none validated.</dd>
+        <dt>typecode_unknown</dt>
+        <dd>No candidate was ever observed in any layer.</dd>
+      </dl>
+      <p>Roles are then read from the type code (see <a href="#role-classification">Role classification</a>), and helicopters and non-aircraft are flagged excluded (see <a href="#rotary-exclusion">Rotary-wing exclusion</a>). Every later stage skips excluded aircraft.</p>
+
+      <h3 id="rotary-exclusion">Rotary-wing exclusion</h3>
+      <p>Helicopters, tilt-rotors and non-aircraft transponders are excluded during type resolution. An aircraft is excluded if any role its resolved type can fill is rotary (via the pipeline&rsquo;s own role taxonomy), or if DOC 8643 describes the designator as a rotorcraft species (Helicopter, Gyrocopter, or Tiltrotor). The DOC 8643 check is a safety net for codes the taxonomy has not yet mapped.</p>
+      <p>An aircraft whose type cannot be resolved from any database is kept. An unidentified helicopter is therefore counted as if it were fixed-wing. This is a deliberate choice: excluding on suspicion would remove aircraft that might be fixed-wing, and the unresolved set is small enough that the error is tolerable in the conservative direction (overcounting, never undercounting).</p>
+
+      <h3 id="stage-2-denoise">3.2 Denoise</h3>
+      <p>Flag position reports that disagree with the aircraft&rsquo;s own surrounding track.</p>
+      <p><strong>Local-fit test.</strong> For each report, fit a straight line to up to 4 neighbouring reports on each side within 180 seconds (at least 3 are needed). &ldquo;Local scatter&rdquo; below means how far the neighbours themselves stray from that line. Before fitting, drop the single most deviant neighbour, so one bad report cannot drag the line. The report is flagged if it lies more than 3 km from the fit <em>and</em> more than 6 times the local scatter. Both tests must fail together, so genuinely noisy MLAT stretches are not pruned wholesale.</p>
+      <table class="param-table">
+        <tr><th>Parameter</th><th>Value</th><th>Why</th></tr>
+        <tr><td>Neighbours per side</td><td>4</td><td>Enough context to fit a line; not so many that distant reports dilute it.</td></tr>
+        <tr><td>Time window</td><td>180 s</td><td>Neighbours beyond 3 minutes are from a different phase of flight.</td></tr>
+        <tr><td>Minimum neighbours</td><td>3</td><td>Below this, a fit is unreliable. Sparse reports fall through to the teleport test instead.</td></tr>
+        <tr><td>Sigma multiplier</td><td>6</td><td>Generous: only true outliers. Narrower values would cut into legitimate MLAT noise.</td></tr>
+        <tr><td>Absolute floor</td><td>3 km</td><td>A report 2 km off a clean track is within MLAT&rsquo;s normal range, not an anomaly.</td></tr>
+      </table>
+      <p><strong>Teleport test.</strong> Catches what the fit cannot judge because reports are too sparse: a report is flagged when every neighbour within 30 minutes would require travel above 1 km/s (3,600 km/h) to reach it. A conflicting pair drops both members, since one report cannot be judged against one other.</p>
+      <p>Why 1 km/s: it is the same speed the impossible-jump scan uses, well above any aircraft. A lower bound would flag normal jet cruise.</p>
+      <p>Flagged reports go to a separate file. Every later stage drops them. About 0.4% of all reports are flagged.</p>
+
+      <h3 id="data-anomalies">Impossible-position anomalies</h3>
+      <p>A scan for physically impossible movement (consecutive reports from one transponder implying more than 1 km/s) found roughly 1,800 such pairs across roughly 620 aircraft. That is about 0.003% of all consecutive reports.</p>
+      <p>Most (85%) involve MLAT: the median jump is about 30 km, and over a third leap out and return within minutes. The denoise stage removes the individual stray reports such jumps consist of. Mislocations too small to trip its tests remain and are covered by the weak-crossing caveat below.</p>
+      <p>Two further patterns, noted for transparency:</p>
+      <ul>
+        <li>Several aircraft &ldquo;teleporting&rdquo; from the location of a single rebroadcast station near Anchorage (a TIS-B artifact).</li>
+        <li>500 to 1,000 km jumps around the Black Sea consistent with GNSS interference. Plausible but unverified.</li>
+      </ul>
+      <p>A small number of addresses also alternate within seconds between two coherent tracks, which looks like two aircraft sharing one ICAO24. None of them reported from inside the analysis region. The only automated correction is the report-level exclusion described under Denoise.</p>
+
+      <!-- ==================== PHASE 4: TIMELINE ==================== -->
+      <h2 id="phase-partition">Phase 4: Timeline</h2>
+      <div class="phase-crops">
+        <svg class="phase-crop" viewBox="817 42 496 664" role="img" aria-label="Pipeline diagram, 4. timeline."><svg x="817" y="42" width="496" height="664" viewBox="817 42 496 664"><use href="#pipeline-all"/></svg></svg>
+      </div>
+      <p>Turn raw points into flights.</p>
+
+      <h3 id="stage-3-partition">4.1 Partition</h3>
+      <p>Divide each aircraft&rsquo;s time into 10-second bins. Each bin is marked using the transponder&rsquo;s <em>on-ground flag</em>, a bit in the broadcast that says whether the aircraft believes it is on the ground:</p>
+      <ul>
+        <li><strong>Ground</strong> &mdash; at least one report carries the transponder&rsquo;s on-ground flag.</li>
+        <li><strong>Air</strong> &mdash; reports present, none on-ground.</li>
+        <li><strong>Off</strong> &mdash; no reports in this bin.</li>
+      </ul>
+      <p>A bin with both ground and airborne reports counts as ground: a taxiing aircraft briefly flagged airborne is still on the ground.</p>
+      <p>Ground intervals are maximal runs of non-airborne bins containing at least one ground bin. Airborne intervals are everything between ground intervals.</p>
+      <p>Within an airborne interval, an off-data run longer than 15 minutes (900 s) is recorded as a <em>blackout</em>. Shorter gaps are receiver dropouts and are never recorded. The 15-minute threshold is the shortest time in which an aircraft could plausibly land and take off again.</p>
+
+      <h3 id="stage-4-edge">4.2 Edge</h3>
+      <p>For each blackout, read the flight state at its two edges (the last report before the silence and the first after it) from the raw trace:</p>
+      <ul>
+        <li>The nearest report within 120 seconds of the boundary timestamp.</li>
+        <li>Altitude at that report.</li>
+        <li>Vertical rate: averaged over up to 5 consecutive points when at least 3 carry a reported rate; otherwise computed from the altitude change across those points.</li>
+        <li>Implied speed: great-circle distance (the shortest path over the Earth&rsquo;s surface) between the two boundary positions divided by the gap duration.</li>
+      </ul>
+      <p>Also flags whether the two boundaries straddle the 31&deg;W meridian (the western edge of the study area, so a transatlantic crossing).</p>
+
+      <h3 id="stage-5-split">4.3 Split</h3>
+      <p id="transmission-blackouts">Military aircraft routinely stop transmitting, whether from a coverage gap or a transponder switched off for part of a mission. A gap of 15 minutes or less is a receiver dropout and is always joined. A longer gap with airborne data on both sides is a <em>blackout</em>.</p>
+      <p>Label each blackout <em>split</em> (the aircraft was on the ground inside it) or <em>join</em> (one continuous flight). The first matching rule wins:</p>
+      <ol>
+        <li><strong>Too long.</strong> Gap &gt; 12 hours &rarr; <em>split</em>. No single flight lasts that long.</li>
+        <li><strong>Transatlantic.</strong> Gap &ge; 3 hours, endpoints straddle 31&deg;W &rarr; <em>split</em>. One end is outside the study area.</li>
+        <li><strong>Landing signature.</strong> Below 15,000 ft and descending past 120 ft/min as the aircraft goes dark (an arrival), <em>or</em> below 15,000 ft and climbing past 120 ft/min as it reappears (a departure) &rarr; <em>split</em>. The direction matters: climbing away as it goes dark, or descending as it returns, is an aircraft still in flight and does <em>not</em> split. This is the same directional test, in the same code, that the landing engine uses. A landing inside a gap labelled as one continuous flight is impossible by construction.</li>
+        <li><strong>Too slow.</strong> Compute the average speed needed to cover the gap's distance, allowing a 15-minute ground stop: <code>impl15 = gc_km / (gap_h &minus; 0.25)</code>. Below 460 km/h &rarr; <em>split</em>. Above it &rarr; <em>join</em>.</li>
+      </ol>
+      <p>The 15,000 ft and 120 ft/min values are the landing engine&rsquo;s own thresholds (see <a href="#stage-7-train">5.1 Train</a>). The 460 km/h cutoff is a policy choice, not a tuned one: the aircraft it classifies may have landed inside a coverage hole, which is unobservable by construction, so no ground truth exists to tune against. It is placed at the valley of the observed implied-speed distribution, between the landing-shaped and transit-shaped populations, and loitering aircraft are therefore systematically rounded to <em>split</em>.</p>
+
+      <p>What happens inside a blackout is unknowable. A dark transit registers nowhere, and a landing hidden mid-blackout is attributed to no airfield or country. Every count on this site is a floor.</p>
+
+      <h3 id="stage-6-flight">4.4 Flight</h3>
+      <p>Assemble flights. Within an airborne interval, every split blackout is a cut: the last report before it ends one flight, the first report after it starts the next. Join blackouts are not cuts. A flight keeps only its observed points.</p>
+      <p>Flights are dropped if they have fewer than 2 points surviving denoise, or if no point falls inside the bounding box. (The partition stage screens whole aircraft; the flight stage screens individual flights.)</p>
+
+      <!-- ==================== PHASE 5: LANDING ==================== -->
+      <h2 id="phase-geography">Phase 5: Landing</h2>
+      <div class="phase-crops">
+        <svg class="phase-crop" viewBox="327 730 546 572" role="img" aria-label="Pipeline diagram, 5. landing."><svg x="327" y="730" width="546" height="572" viewBox="327 730 546 572"><use href="#pipeline-all"/></svg></svg>
+      </div>
+      <p>Determine where flights went: which countries they crossed, where they landed, and which ones belong to the Middle East theater.</p>
+
+      <h3 id="stage-7-train">5.1 Train</h3>
+      <p>Blackouts that look like landings need a place name. This stage learns how to choose one, using approaches and departures whose landing airfield is known (directly observed on the ground nearby). The <em>edge</em> of a blackout means the last report before it or the first after it. The model has two parts:</p>
+      <ul>
+        <li>A field scorer: given the aircraft state at a blackout edge (speed, altitude, vertical rate, bearing to each candidate field), pick the airfield among the candidates within 150 km.</li>
+        <li>A conditional density that gives the probability distribution of where the aircraft actually is, used to read off country probabilities.</li>
+      </ul>
+      <p>Both levels are calibrated to abstain rather than guess: the field scorer names a field only when one candidate decisively outscores the rest; the country readout names a country only when one dominates the distribution. The model writes an artifact; the next stage uses it.</p>
+
+      <h3 id="stage-8-attribute">5.2 Attribute</h3>
+      <p>This stage does three things in one pass over the full-resolution traces:</p>
+      <ol>
+        <li><strong>Country traversal.</strong> Test every point of each flight against a country raster (a grid of small cells, here 0.01&deg; across, each labelled with the country it lies in; cells next to every border and coastline are dropped, so a point must be clearly inside a country to count) to record which countries the flight crossed, and when. The raster covers European countries only; crossings of Middle Eastern and North African airspace are not recorded.</li>
+        <li><strong>Sighting index.</strong> A sighting is a position over a country&rsquo;s land (see <a href="#what-if">Refusal mode</a>). Build the per-aircraft, per-day, per-country sighting table that the Refusal counterfactual uses.</li>
+        <li><strong>Landing engine.</strong> Collect observed ground intervals and silence-edge evidence, then run the landing engine (see <a href="#landings">Landings</a>) to produce landing events. Each flight&rsquo;s origin and destination are read from the resulting table.</li>
+      </ol>
+
+      <h3 id="landings">Landings</h3>
+
+      <p><strong>Scope of the legal research, stated plainly.</strong> The per-country legal and treaty analysis covers <strong>flyover permission only</strong>. Landing and basing rights were not researched: they are site-specific, negotiated per installation, often under separate instruments, and harder to interpret reliably. The landing <em>data</em> below is computed to the same standard as everything else. Do not read a country&rsquo;s landing count as having been checked against its basing agreements, because it has not been.</p>
+      <p>The two differ in how widely they are held. Landings concentrate in a few jurisdictions; flyover is spread across many countries, any one of which could disrupt a route by refusing it.</p>
+
+      <h4 id="ground-time">How ground time is established</h4>
+      <p>Every landing on the site derives from a <em>ground-presence interval</em>: this aircraft was on the ground from about this time to about this time, established only by evidence local to those moments. Two questions are answered in order: was it on the ground, and then, can a place be named. The second never gates the first.</p>
+
+      <p><strong>Observed intervals.</strong> A run of consecutive reports that each indicate ground. A report indicates ground if:</p>
+      <ul>
+        <li>It carries the transponder&rsquo;s on-ground flag at 160 kt or below (the flag is sometimes stuck on at cruise, so reports above 160 kt are ignored), or</li>
+        <li>It is airborne at 160 kt or below and at or below 2,500 ft MSL (altitude above mean sea level), anywhere, near an airfield or not.</li>
+      </ul>
+      <p>The run becomes one interval from its first to its last report. It survives reception gaps shorter than 15 minutes and is cut by any non-indicating report or any 15-minute silence.</p>
+      <p>The altitude ceiling is fixed MSL, not terrain-relative. Ground time at high elevations is undercounted. This is accepted for consistency: the field-naming pass is separate from the ground-detection pass and runs second.</p>
+      <p>An interval resting on a single report with no other report of that aircraft within 15 minutes is dropped (the isolation veto), since it cannot be told from a stray.</p>
+
+      <p><strong>Boundary intervals.</strong> The trajectory at the edge of a 15-minute-or-longer silence: sinking below 15,000 ft into it, or climbing out of it. This is the same directional test that decides whether a silence splits a flight. A boundary gives a one-sided interval: a descent into silence says ground time began sometime after that last report; a climb out says it ended sometime before the first report back. The other side stays unknown. No claim is made about any moment inside a gap.</p>
+
+      <h4 id="place-naming">How places are named</h4>
+      <p>Naming is a second pass over each interval. It never changes whether a landing exists or how many there are.</p>
+
+      <p><strong>Observed intervals.</strong> The place comes from the interval&rsquo;s lowest reports: those within 300 ft of its minimum altitude, plus every on-ground-flag report. The airfield containing most of them wins, under a score that weights military bases and large airports above small strips. If no eligible airfield contains them, the unanimous country is named. Otherwise no place is named.</p>
+
+      <p><strong>Boundary events.</strong> Both airfield and country come from the trained model (<a href="#stage-7-train">5.1 Train</a>). The airfield is chosen among the fields within 150 km by a scorer weighted by each field&rsquo;s observed traffic, and named only when one candidate decisively outscores the rest. The country is the one holding the largest share of the learned distribution, named only when one country dominates. Both levels abstain rather than guess.</p>
+
+      <h4 id="merging-silences">Merging two-sided silences</h4>
+      <p>When a silence has both a descent edge (arrival) and a climb edge (departure), a calibrated merge rule decides whether they attest one stay or two.</p>
+      <p>The rule compares how well the two edges&rsquo; landing footprints overlap against the measured base rate of unobserved movement during dark ground periods. That base rate is high: 96.6% to 100% of the time, an aircraft that goes dark on the ground reappears at the same field, even days later.</p>
+      <p>The merge is biased toward one stay, because splitting a true single stay fabricates a landing (the forbidden direction), while merging two true stays undercounts by one (tolerated). It splits only when the odds say &ldquo;different places&rdquo; is at least 3x more probable than &ldquo;same&rdquo;, or when each edge independently and confidently names a different airfield, in which case the naming overrides the odds.</p>
+      <p>In a validation on held-out dates (3,041 silence edges inside the study area whose field was known from a ground observation), naming the most confident 80% of edges was 97.7% correct. The production model is retrained the same way on each build; this figure is not re-measured per build.</p>
+      <p>Naming runs on every non-excluded aircraft seen inside the study area. Events too high or too ambiguous to place keep their on-the-ground status with no place named.</p>
+
+      <h4 id="what-is-counted">What is counted</h4>
+      <p>The unit is a landing <em>event</em>: one per ground stay, however long. An aircraft parked for three days is one landing; an aircraft flying circuits that touches down five times in an afternoon is five.</p>
+      <p>Day-based surfaces (the Ground column, the sighting index) credit a stay&rsquo;s full span &mdash; arrival day through departure day, including days it sat parked without transmitting &mdash; on the strength of the same-place base rate above.</p>
+      <p>Each event carries an evidence tier: <em>observed</em>, <em>two-edge</em> (descent and climb merged), or <em>one-edge</em> (only an arrival or only a departure attested).</p>
+
+      <h4 id="flight-origin-destination">Flight origin and destination</h4>
+      <p>Shown when a single flight is selected. These are the landing events at the flight&rsquo;s own edges: a boundary event, or an observed stay within the same continuously observed span (no 15-minute gap and no other flight in between). No label crosses a silence.</p>
+
+      <h4 id="airfield-data">Airfield data</h4>
+      <p>Airfield records come from OurAirports, with one adjustment: US airfields that host military units under a civil classification (Air National Guard and Reserve wings at civil airports, fields with military naming patterns such as AFB/NAS/MCAS, and OpenStreetMap-listed military airfields) are reclassified as military bases in the pipeline&rsquo;s airfield index, with hand-set radii. The table is in the public source.</p>
+      <p>All landing counts are floors. Sparse ground reception, the isolation veto, unattributable silences and ineligible minor airfields each remove genuine landings and never add false ones.</p>
+
+      <h3 id="landing-uncertainty">Landing attribution uncertainty</h3>
+      <p>Landing counts carry several compounding uncertainties beyond coverage and transponder limits. Airport-level figures are best read as approximate indicators of activity.</p>
+      <dl class="def-list">
+        <dt>Snap attribution</dt>
+        <dd>Assigning a low or on-ground position to a nearby airport is a heuristic. Where airports cluster &mdash; a military base next to a civil airport, or several fields within tens of kilometres &mdash; the attribution can pick the wrong one.</dd>
+        <dt>Single-aircraft airfields</dt>
+        <dd>Every attributed airfield appears on the map, including fields visited once. The isolation veto and the abstention rules keep noise off the map; there is no minimum visit count.</dd>
+        <dt>MLAT-induced misattribution</dt>
+        <dd>MLAT reports can be several kilometres off. When that puts a report near the wrong airport, the snap cannot tell it from a genuine observation.</dd>
+        <dt>Unobserved landings</dt>
+        <dd>If the transponder is off during descent and on the ground, the landing is invisible. With the Mediterranean, Balkans and eastern Europe coverage gaps, many landings go unrecorded. Every landing count is a floor.</dd>
+        <dt>Residual stray contacts</dt>
+        <dd>Impossible reports are excluded pipeline-wide. Single-report intervals are dropped. The remaining unverifiable class &mdash; multi-report contacts that could share a systematic mislocation &mdash; is not measured. Each interval&rsquo;s report sources are recorded for audit.</dd>
+        <dt>Boundary-event naming accuracy</dt>
+        <dd>Where a landing is inferred from a descent or climb at a silence edge, field and country come from the trained model; its measured accuracy is given under <a href="#merging-silences">Merging two-sided silences</a>.</dd>
+      </dl>
+      <p>None of this invalidates the data. The airports on the map overwhelmingly represent real military activity, but individual airport counts, especially small ones, are approximate.</p>
+
+      <h3 id="stage-9-theater">5.3 Theater</h3>
+      <p>Group each aircraft&rsquo;s flights into mission chains and mark the chains that reach the Middle East theater (the region of the ongoing conflict, defined by two map boxes). See <a href="#theater-filter">Theater filter</a>.</p>
+
+      <h3 id="theater-filter">Theater filter</h3>
+      <p>The theater filter restricts the view to flights involved in the Middle East theater. Three settings:</p>
+      <dl class="def-list">
+        <dt>Tasking (the default)</dt>
+        <dd>The flight belongs to a mission chain that touches the theater. A chain is a run of one aircraft&rsquo;s consecutive flights with no ground stop longer than 48 hours between them. A longer stop breaks the chain. If any part of the chain reaches the theater, every flight in it counts &mdash; including the positioning legs beforehand and the return legs after.</dd>
+        <dt>Ever</dt>
+        <dd>Every flight of an aircraft seen in the theater at any point in the window.</dd>
+        <dt>Off</dt>
+        <dd>No theater filter.</dd>
+      </dl>
+
+      <h4 id="theater-geography">Theater geography</h4>
+      <p>Two boxes define the theater:</p>
+      <table class="param-table">
+        <tr><th>Box</th><th>Latitude</th><th>Longitude</th></tr>
+        <tr><td>Middle East</td><td>10&ndash;38&deg;N</td><td>14&ndash;63.5&deg;E</td></tr>
+        <tr><td>Balkans</td><td>38&ndash;44&deg;N</td><td>20&ndash;26&deg;E</td></tr>
+      </table>
+      <p>Any position inside the Middle East box is theater evidence.</p>
+      <p>The Balkans box overlaps the main European corridor, so a transit through it counts only under a stricter test: the aircraft must disappear from coverage at the box edge for at least 30 minutes while heading into the Middle East arc (bearings 95&deg; to 190&deg;, ESE through S), or reappear heading back out (275&deg; to 10&deg;, WNW through N). The bearing is averaged over the last 4 in-box points.</p>
+      <p>Headings to the northeast and east are excluded, so transits toward Ukraine or the Black Sea are not counted. The 30-minute gap is deliberately coarser than the 15-minute blackout threshold: it asks whether the aircraft genuinely left coverage, not whether a flight should be split.</p>
+
+      <h4 id="numbers-on-the-site">Numbers on the site</h4>
+      <p>Everything in the stats table and the headline is computed live under the active filters: date range, roles, and theater (Tasking plus the default roles, unless changed).</p>
+      <dl class="def-list">
+        <dt>Sum / Crosses / Previously crossed (Flights columns)</dt>
+        <dd>The Refusal counts above, each as a share of flights from the denial day on. Outside Refusal mode the denial day is the later of 28 February 2026 and the start of the selected date range. The headline percentages marked with an asterisk are the same figures.</dd>
+        <dt>Sky (Planes column)</dt>
+        <dd>Distinct aircraft seen over the country at least once in the date range, as a share of the in-scope fleet (every aircraft with a flight under the active filters). Not gated to the denial day.</dd>
+        <dt>Ground (Planes column)</dt>
+        <dd>Distinct aircraft with at least one landing day in the country in the date range, same denominator. Not gated to the denial day.</dd>
+        <dt>Landings</dt>
+        <dd>Share of all landing stays that fell in this country. A stay is a run of consecutive landing days for one aircraft in one country: an aircraft parked for three days is one stay. The denominator is the total of such stays across every country with a stats table. The tooltip shows counts and distinct aircraft. See <a href="#landings">Landings</a>.</dd>
+      </dl>
+      <p>Below the table, a <strong>Statistics</strong> entry opens two further breakdowns of the same flights: one row per aircraft type, one per role group, with the same columns. Type rows are shares of the country&rsquo;s own totals. Role-group rows are shares of that group&rsquo;s own totals, so a high number means the country matters to that role, not that the role dominates the country. Roles overlap, so group rows do not sum to 100%. Selecting a row shows its day-by-day chart.</p>
+      <p>Reception drops off over Romania, Bulgaria, Greece and the Mediterranean, so these counts are likely an undercount.</p>
+
+      <!-- ==================== PHASE 6: PUBLISH ==================== -->
+      <h2 id="phase-publish">Phase 6: Publish</h2>
+      <div class="phase-crops">
+        <svg class="phase-crop" viewBox="897 730 326 572" role="img" aria-label="Pipeline diagram, 6. publish."><svg x="897" y="730" width="326" height="572" viewBox="897 730 326 572"><use href="#pipeline-all"/></svg></svg>
+      </div>
+      <p>Prepare the files the site loads.</p>
+
+      <h3 id="stage-10-trace">6.1 Trace</h3>
+      <p>Simplify each flight&rsquo;s path with the Ramer-Douglas-Peucker algorithm (which drops points that barely change the shape of a line) at a 2 km tolerance, for map rendering. Only the map uses these lines; analysis stages use the full-resolution points.</p>
+
+      <h3 id="stage-11-export">6.2 Export</h3>
+      <p>Write the files the site loads:</p>
+      <ul>
+        <li>Per-flight metadata table</li>
+        <li>Route geometry at two resolutions: desktop (~111 m tolerance) and mobile (~11 km)</li>
+        <li>Landing points and airport metadata</li>
+        <li>Role catalogue and aircraft-to-role mapping</li>
+        <li>Per-country sighting indexes (which aircraft were seen over, or on the ground in, each country on each day)</li>
+        <li>Country boundaries and the data manifest</li>
+      </ul>
+      <p>No statistics are published. Every per-country, per-day and per-role number is computed in the browser from the per-flight table and the sighting index, under whatever filters are active.</p>
+      <p>The download step skips days already fetched, and every later stage recomputes deterministically from its inputs, so the whole pipeline can be repeated safely. <span data-repo-sentence>The <a data-repo-link href="" target="_blank" rel="noopener">source code</a> is public.</span></p>
+    </section>
+
+    <!-- ============================================================
+         FEATURES & ANALYSIS
+         ============================================================ -->
+    <section id="panel-features">
+
+      <h2 id="routes">Routes</h2>
+      <p>Each flight is drawn as its own translucent line, coloured by altitude on a 16-step blue-to-red scale in 2,500 ft bands (the legend labels altitude in kft, thousands of feet). Where many flights overlap, the stacking makes busy corridors brighter. No density statistic is computed; line width changes only with zoom. A point with no reported altitude takes the band of its neighbours.</p>
+      <p>When a country is selected, only routes that cross it are shown. In Refusal mode the altitude colours are replaced: red for flights that <em>cross</em> the country after the refusal date, blue for flights of aircraft that had <em>previously crossed</em> it, green for unaffected.</p>
+
+      <h2 id="what-if">Refusal mode</h2>
+      <p>For countries that permitted overflight, the map offers a counterfactual. Pick a date and ask: how many flights could not have happened the way they did, had this country closed its land and airspace from that day on?</p>
+      <p>A <em>sighting</em> is any position over the country&rsquo;s land during one of the aircraft&rsquo;s assembled flights, at any altitude, including on the ground at the flight&rsquo;s endpoints. Parked-transponder positions between flights do not count. We measured the difference on an earlier build: 0.84% of in-country positions fell outside every flight, and only three aircraft-country pairs in the whole window rested solely on such positions. The figure is not re-measured on each build. Land is tested against the same raster as country traversal; positions over territorial sea do not count.</p>
+      <p>Two kinds of flights are counted, both from the refusal date on:</p>
+      <dl class="def-list">
+        <dt>Crosses</dt>
+        <dd>The flight&rsquo;s own trace crosses the country on or after the refusal day.</dd>
+        <dt>Previously crossed</dt>
+        <dd>The aircraft had been over the country on or after the refusal date before this flight began, so the flight could not have started from where it did. This is an inference, not an observation.</dd>
+      </dl>
+      <p>Both figures are shares of all flights from the refusal date on, under the active filters. All counts are floors, for the transponder-off reasons under <a href="#transmission-blackouts">Transmission blackouts</a>: a hidden crossing can neither count nor disrupt later flights. No re-routing is modelled.</p>
+      <p>The refusal date cannot be earlier than the Refusal start date published with the data, so the sighting history the counterfactual relies on is complete.</p>
+
+    </section>
+
+    <!-- ============================================================
+         DEFINITIONS & DETAIL
+         ============================================================ -->
+    <section id="panel-definitions">
+
+      <h2 id="overflight">What is an &ldquo;overflight&rdquo;?</h2>
+      <p>A recorded flight segment in which an identified US military aircraft crossed a country&rsquo;s airspace, as decided by the country raster.</p>
+      <p>An overflight says nothing about whether it was authorised. Military overflight arrangements take many forms &mdash; standing agreements, per-flight diplomatic clearances, informal permissions &mdash; and are usually not public. The legal framework is discussed in the per-country reference where it was researched, with citations. This site records what flew where; whether it was permitted is a separate question.</p>
+
+      <h2 id="role-classification">Role classification</h2>
+      <p>Roles come from the aircraft type code, via a taxonomy of known military designators. Many codes map to one role (a C-17 is strategic airlift). Some families serve several roles depending on variant: the C-130 family includes airlifters, tankers, gunships, special-operations platforms and search-and-rescue aircraft. A type with several roles carries all of them.</p>
+      <p>For a few multi-variant designators, the registry description narrows the roles: a Super King Air described as an MC-12W is narrowed to that variant&rsquo;s surveillance roles. If the description matches no known variant, the full set is kept. A short override list in the public configuration corrects registry entries found to be wrong.</p>
+      <p>A role filter shows a flight if any of its roles match. The same flight can appear under several roles, and per-role statistics do not add up to the totals.</p>
+      <p>Types that could not be resolved are kept in explicit unknown buckets: a code never seen in any registry, a code seen but matching no designator, and a recognised type with no role. These are grouped as &ldquo;Role unknown&rdquo; and shown by default, so unclassified aircraft are never silently dropped.</p>
+      <p>For the interface, roles are grouped:</p>
+      <ul>
+        <li><span class="glossary-term">Airlift:</span> strategic and tactical transport, special operations lift, combat search and rescue (C-5, C-17, C-130, CV-22)</li>
+        <li><span class="glossary-term">Refuelling:</span> tankers (KC-135, KC-46, KC-10)</li>
+        <li><span class="glossary-term">Combat:</span> fighters, multirole, close air support, bombers, gunships (F-15, F-16, F-35, B-52, AC-130)</li>
+        <li><span class="glossary-term">ISR (Intelligence, Surveillance, Reconnaissance):</span> maritime patrol, airborne early warning, signals intelligence, ground surveillance, command relay, strategic reconnaissance, unmanned ISR (RC-135, E-3, RQ-4, P-8, E-11)</li>
+        <li><span class="glossary-term">Other roles:</span> trainers, VIP and executive transport, light utility, civil contract cargo. Off by default.</li>
+        <li><span class="glossary-term">Role unknown:</span> type or role unresolved, as above. On by default.</li>
+      </ul>
+
+      <h2 id="country-reference">Per-country legal reference</h2>
+      <p>When you select a country, the sidebar shows a brief summary and a table of contents listing whatever content exists: <em>Summary</em>, then up to three researched entries &mdash; <em>Treaties: How are flights authorized?</em>, <em>What happened: Refusal vs Cooperation</em>, and <em>Legal: How to say no</em> &mdash; with only the entries that have content shown. A note above them says they draw on AI-assisted legal and news research.</p>
+      <p>This material is separate from the flight statistics. It was produced by per-country research over primary legal sources (treaties, statutes, official gazettes, aeronautical information publications, and parliamentary and court records) together with quality press, then adversarially verified by re-fetching every cited source to confirm each cited sentence is precisely supported. Only high-confidence, directly-supported statements are included.</p>
+      <p>Within each entry, every claim carries a numbered footnote (numbering restarts per entry). Clicking a footnote scrolls to the matching source at the bottom of that entry; a &ldquo;back to text&rdquo; control returns you. This is a sourced analytical reference, <strong>not legal advice</strong>.</p>
+
+      <h2 id="permissiveness-levels">Permissiveness levels</h2>
+      <p>Each country carries one of three levels, shown as a colour on the map and keyed in the legend. These are an editorial classification from the sourced per-country research and the observed flight data, not an automated score.</p>
+      <dl class="def-list">
+        <dt>Level 0 &mdash; &ldquo;Blocks most overflight (long-standing)&rdquo;</dt>
+        <dd>Prohibits almost all overflight.</dd>
+        <dt>Level 1 &mdash; &ldquo;Acted in 2026 to block some overflight&rdquo;</dt>
+        <dd>Prohibits overflight for offensive operations or combat aircraft, or for military supply to Israel.</dd>
+        <dt>Level 2 &mdash; &ldquo;Permits most overflight&rdquo;</dt>
+        <dd>Permits most overflight.</dd>
+      </dl>
+      <p>For the evidence behind any one country&rsquo;s level, use the per-country reference rather than the label alone.</p>
+      <p>Separately, each country carries an <strong>interaction level</strong> from 0 to 3 that controls what the site shows. Each level includes everything below it: level 1 unlocks the researched info entries, level 2 the per-country stats table, level 3 the Refusal counterfactual.</p>
+      <p>A country at level 0 has nothing to show and is not clickable. Today that is Ukraine, Belarus and Russia, drawn and shaded for geographic context only. Their airspace is effectively closed to US military aircraft for reasons unrelated to this war. There are no statistics, citations or crossing data for them, and they are not counted in any total.</p>
+    </section>
+
+    <!-- ============================================================
+         CAVEATS
+         ============================================================ -->
+    <section id="panel-caveats">
+
+      <h2 id="limitations">Limitations</h2>
+      <dl class="def-list">
+        <dt>Coverage gaps</dt>
+        <dd>Not all areas have receivers. Oceanic segments and parts of eastern Europe and the Mediterranean are sparse. MLAT fills some of the gaps, noisily; the rest are unobserved.</dd>
+        <dt>Transponder off</dt>
+        <dd>Military aircraft can and do switch off their transponders, especially during sensitive operations. See <a href="#transmission-blackouts">Transmission blackouts</a>. All figures on this site are lower bounds.</dd>
+        <dt>MLAT position quality</dt>
+        <dd>MLAT is a fifth of the reports but almost all the position anomalies. The denoise filter catches large, fast jumps. It does not catch slow mislocations: positions shifted by a few kilometres, too gradually to stand out, but enough to put a report on the wrong side of a border. About 6% of country-crossing assertions rest on fewer than six reports or fewer than 60 seconds inside the country, most of them MLAT. These weak crossings are reported because excluding them would need an arbitrary threshold, and any such threshold risks hiding genuine crossings. Small countries and countries under busy corridors are most affected.</dd>
+        <dt>Classification accuracy</dt>
+        <dd>Some aircraft may be misclassified by role. Contract carriers may include non-military flights.</dd>
+        <dt>Sovereignty vs. permission</dt>
+        <dd>An overflight does not prove authorisation. The absence of overflights does not prove refusal. Diplomatic arrangements are often not public.</dd>
+      </dl>
+
+      <h2 id="glossary">Glossary</h2>
+      <ul>
+        <li><span class="glossary-term">ADS-B</span> &mdash; Automatic Dependent Surveillance&ndash;Broadcast. Aircraft broadcasts its own GPS-derived position via radio on 1090 MHz.</li>
+        <li><span class="glossary-term">ADS-R</span> &mdash; Automatic Dependent Surveillance&ndash;Rebroadcast. A ground station relays ADS-B data between the 1090 MHz and 978 MHz UAT frequencies.</li>
+        <li><span class="glossary-term">Blackout</span> &mdash; A transmission gap longer than 15 minutes with airborne data on both sides, classified as a split or a join. Not the same as a short receiver dropout, which is always ignored.</li>
+        <li><span class="glossary-term">Boundary event</span> &mdash; A landing inferred from the way an aircraft descended into, or climbed out of, a blackout, rather than seen on the ground. Its airfield and country come from the trained model.</li>
+        <li><span class="glossary-term">Chicago Convention</span> &mdash; The 1944 Convention on International Civil Aviation. Establishes state sovereignty over airspace (Article 1) and requires state aircraft to obtain authorization before entering another state&rsquo;s airspace (Article 3(c)).</li>
+        <li><span class="glossary-term">Crosses</span> &mdash; A Refusal count: flights whose own trace crosses the country on or after the refusal date. See <em>Previously crossed</em>.</li>
+        <li><span class="glossary-term">DCA</span> &mdash; Defense Cooperation Agreement. A bilateral treaty governing basing arrangements and, in some cases, overflight.</li>
+        <li><span class="glossary-term">DCN</span> &mdash; Diplomatic Clearance Number. A per-flight authorization a state issues for foreign military aircraft to enter its airspace.</li>
+        <li><span class="glossary-term">Denoise</span> &mdash; The pipeline stage that flags position reports disagreeing with the aircraft&rsquo;s own track, by a local line fit and a 1 km/s impossibility test.</li>
+        <li><span class="glossary-term">Evidence tier</span> &mdash; How a landing was established: <em>observed</em> (seen on the ground), <em>two-edge</em> (an arrival and a departure around a blackout, merged into one stay) or <em>one-edge</em> (only one of the two seen).</li>
+        <li><span class="glossary-term">Flight</span> &mdash; One continuous airborne trip of one aircraft. A long blackout containing a landing ends one flight and starts the next.</li>
+        <li><span class="glossary-term">Great-circle distance</span> &mdash; The shortest distance between two points over the Earth&rsquo;s surface.</li>
+        <li><span class="glossary-term">Ground</span> &mdash; The stats table&rsquo;s Planes column: distinct aircraft with at least one landing day in the country, as a share of the in-scope fleet.</li>
+        <li><span class="glossary-term">ICAO</span> &mdash; International Civil Aviation Organization, the UN agency that defines aircraft type designators (DOC 8643) and the address format below.</li>
+        <li><span class="glossary-term">ICAO24</span> &mdash; A 24-bit address, written as six hexadecimal digits, uniquely identifying each aircraft&rsquo;s transponder.</li>
+        <li><span class="glossary-term">ISR</span> &mdash; Intelligence, Surveillance, and Reconnaissance.</li>
+        <li><span class="glossary-term">Join</span> &mdash; The verdict for a blackout during which the aircraft kept flying: the flight continues across it. The opposite of <em>split</em>.</li>
+        <li><span class="glossary-term">Landing event</span> &mdash; One stay on the ground, however long: an aircraft parked for three days is one landing, and one that touches down five times in an afternoon is five.</li>
+        <li><span class="glossary-term">Landings (column)</span> &mdash; Share of all landing stays (runs of consecutive landing days, across every country with a stats table) that fell in this country.</li>
+        <li><span class="glossary-term">Lower bound</span> &mdash; A count that can be too low but is never inflated by guesswork. Every figure on this site is one, because unseen flights and landings cannot be counted.</li>
+        <li><span class="glossary-term">Mission chain</span> &mdash; A run of one aircraft&rsquo;s consecutive flights with no ground stop longer than 48 hours between them. The unit of the Tasking theater filter.</li>
+        <li><span class="glossary-term">MLAT</span> &mdash; Multilateration. Position estimated from time-difference-of-arrival of a transponder signal at several receivers. Noisier than ADS-B.</li>
+        <li><span class="glossary-term">MSL</span> &mdash; Mean sea level. Altitudes in the landing rules are measured from it, not from the terrain below.</li>
+        <li><span class="glossary-term">On-ground flag</span> &mdash; A bit in the transponder&rsquo;s broadcast saying the aircraft believes it is on the ground.</li>
+        <li><span class="glossary-term">Overflight</span> &mdash; A flight segment crossing a country&rsquo;s airspace, as defined by position reports inside its rasterized boundary.</li>
+        <li><span class="glossary-term">Position report</span> &mdash; One received broadcast of an aircraft&rsquo;s position, altitude and speed. Also called a point. An aircraft&rsquo;s time-ordered reports form its trace.</li>
+        <li><span class="glossary-term">Previously crossed</span> &mdash; A Refusal count: flights by an aircraft that had already been over the country on or after the refusal date, so the flight could not have started where it did. An inference, not an observation.</li>
+        <li><span class="glossary-term">Raster</span> &mdash; A grid of small cells, each labelled with the country it lies in, used to decide which country a position falls in.</li>
+        <li><span class="glossary-term">Refusal date</span> &mdash; In Refusal mode, the chosen date from which a country is imagined to deny passage. Also called the denial date.</li>
+        <li><span class="glossary-term">Role</span> &mdash; What an aircraft type is used for (airlift, refuelling, combat, ISR and so on), looked up from its type code. One type can have several roles.</li>
+        <li><span class="glossary-term">Rotary-wing</span> &mdash; Helicopters and tilt-rotors. They are excluded from all counts.</li>
+        <li><span class="glossary-term">Sighting</span> &mdash; A position over a country&rsquo;s land during one of an aircraft&rsquo;s flights, at any altitude, including on the ground at the flight&rsquo;s endpoints.</li>
+        <li><span class="glossary-term">Sky</span> &mdash; The stats table&rsquo;s Planes column: distinct aircraft sighted over the country at least once, as a share of the in-scope fleet.</li>
+        <li><span class="glossary-term">SOFA</span> &mdash; Status of Forces Agreement. A bilateral treaty governing the legal status of foreign military personnel and assets.</li>
+        <li><span class="glossary-term">Split</span> &mdash; The verdict for a blackout during which the aircraft is judged to have landed: the flight is cut in two there. The opposite of <em>join</em>.</li>
+        <li><span class="glossary-term">Statistics</span> &mdash; The reader entry beneath a country&rsquo;s stats table, breaking flights down by aircraft type and by role group.</li>
+        <li><span class="glossary-term">Stay</span> &mdash; A run of consecutive landing days for one aircraft in one country. The unit counted in the Landings column.</li>
+        <li><span class="glossary-term">Tasking</span> &mdash; The default theater filter: a flight counts if it belongs to a mission chain that reaches the Middle East theater.</li>
+        <li><span class="glossary-term">Theater</span> &mdash; The Middle East region (a map box over 10&ndash;38&deg;N, 14&ndash;63.5&deg;E, plus a stricter test for a Balkans box) used by the theater filter.</li>
+        <li><span class="glossary-term">TIS-B</span> &mdash; Traffic Information Service&ndash;Broadcast. A ground station re-broadcasts radar-derived positions for ADS-B-equipped aircraft.</li>
+        <li><span class="glossary-term">Trace</span> &mdash; The time-ordered position reports received from one aircraft.</li>
+        <li><span class="glossary-term">Transponder</span> &mdash; The radio device on an aircraft that broadcasts its identity, position and altitude.</li>
+        <li><span class="glossary-term">Type code</span> &mdash; The ICAO designator naming an aircraft model, such as C17 or KC135.</li>
+        <li><span class="glossary-term">UAT</span> &mdash; Universal Access Transceiver. The 978 MHz ADS-B link used by some small aircraft; ADS-R relays between it and 1090 MHz.</li>
+        <li><span class="glossary-term">Refusal</span> &mdash; The counterfactual mode: pick a date and see how many flights would have been affected had a country closed its airspace from then on. No re-routing is modelled.</li>
+      </ul>
+    </section>
+  </div>
+</body>
+</html>

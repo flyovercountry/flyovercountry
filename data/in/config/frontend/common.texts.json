@@ -1,0 +1,85 @@
+{
+  "_doc": {
+    "templates_placeholders": "templates.headline_intro/headline_outro deliberately mix two placeholder syntaxes, each owned by a different substitution pass: single-brace `{name}` is resolved ONCE, at config-merge time, from the country's own headline_name (frontend/src/data.js's mergeFocusConfig, mirrored by backend/util/focus_config.py's merge_focus_config — keep the two in sync) and is baked into the merged `headline` string shipped to the client. Double-brace `{{date}}`/`{{end}}`/`{{comb}}`/`{{dir}}`/`{{pos}}`/`{{acft}}`/`{{flights_and_landings}}` are resolved on every render, from live filter/What-If state, by frontend/src/data.js's fillHeadlineStats (called via panel-data.js's interpolateHeadline and directly from map.js) — these must stay unresolved until then, so they use a visually distinct syntax on purpose. templates.closing has no placeholders. One other field elsewhere in this file has its own separate single-brace placeholders substituted by yet other code, not by either function above: share.country's `{pct}`/`{adjective}`/`{name}` (frontend/src/share-links.js). The tour and contact actions in the sidebar footer are real buttons, labelled from footer.tour_label and footer.contact_label — `{tour_link}`/`{contact_link}` are still substituted into footer.text if an older config string carries them, but the shipped text no longer does. footer.text's `<br>` tags are literal HTML line breaks, rendered via {@html}. footer.contact_url is the single source of the contact-form URL: both the frontend (ContentPanel.svelte, via getFocusConfig()) and the backend's roles_page.py read this same key rather than each hardcoding their own copy."
+  },
+  "description": "US military flights over Europe, mapped. See which countries enable which missions.",
+  "footer": {
+    "text": "Explore the data.",
+    "tour_label": "Take the tour"
+  },
+  "share": {
+    "no_country": "Which countries let US military flights cross their airspace in the war on Iran? See the map:",
+    "country": "{pct}% of US military flights involved in the war on Iran were of aircraft that had passed through {adjective} airspace — can {name} stop the war by rejecting overflight?"
+  },
+  "hashtags": {
+    "country": [
+      "flyovercountry",
+      "flyovercountryCTAGS"
+    ],
+    "no_country": [
+      "flyovercountry"
+    ]
+  },
+  "info": {
+    "headline": "’Flyover country’ is a derogatory US term referring to states that wealthier Americans fly over but don’t think or care about - as they move between destinations they consider more important.\n\nIs your country… a flyover country? You may have a choice.\n\nThe US-Israeli war on Iran and Lebanon is completely reliant on transatlantic flights crossing Europe, as well as resupply routes connecting the war theater to bases in Germany and the UK.\n\nMany countries on the way could decide which planes to let into their airspace - ones that help Ukraine or European interests, or ones that counter them.\n\nAre your leaders giving speeches but not doing what’s in their power?",
+    "sections": [
+      {
+        "text": "This site combines two kinds of content. The map, the routes, and the percentage figures in each country's headline are computed from tracked flight data. The surrounding text — the framing questions, the calls to action, and the judgments about what individual countries should do — is this project's own commentary, not a measurement. The tier labels used for countries ('Blocks most overflight (long-standing)', 'Acted in 2026 to block some overflight', 'Permits most overflight') are an editorial classification based on the sourced per-country research, not an automated score. See Methodology, in the Info list, for how the data is computed and how tiers are assigned.",
+        "title": "How to read this page"
+      },
+      {
+        "text": "Without European cooperation, the US cannot sustain its war on Iran. Every major air route from the continental US or its main European bases in the UK and Germany to the Middle East theater crosses European airspace.",
+        "title": "The war depends on European airspace"
+      },
+      {
+        "text": "Spain, France, Switzerland and Austria deny overflight to planes involved in offensive operations in this war, as well as to ones resupplying the Israeli war effort. At the same time, Ukrainian and Russian airspace are effectively closed to US military aircraft.",
+        "title": "Some countries already say no"
+      },
+      {
+        "text": "Consequently, the majority of US military flights connecting the US or its main European supply bases in the UK or Germany to the war theater follow a single route, with multiple single points of failure.\n\nIf Slovakia or Hungary were to similarly deny overflight, US operations could be severely disrupted. Other countries are in slightly less strong positions for unilateral action, but can still block the route together, or apply significant pressure unilaterally.",
+        "title": "A single country could end the war"
+      },
+      {
+        "text": "On Tuesday, May 5, Saudi Arabia and Kuwait told the United States it could not use their airspace or bases for a planned offensive. The US stopped the offensive and only resumed two days later after both countries reversed course and permitted overflight. If they can stop the war, maybe you can too.\n\nNote: this event took place after 16 April 2026, when the flight data mapped on this site ends, so it is not reflected in the map, routes, or percentages elsewhere on this page.",
+        "title": "It has already worked"
+      },
+      {
+        "text": "Europeans could stop this war today. It is unjust and illegal, and hurts countless people in West Asia. But it also damages European interests, both economically and by distracting from Ukraine.\n\nClick on the various countries to see the routes through them, and explore the data.",
+        "title": "What can your country do?"
+      },
+      {
+        "text": "US military flights in Europe also assist in repelling Russia's invasion of Ukraine. The US' use of European airspace and bases for another illegal and unjust aggressive war has strained transatlantic cooperation. It has reduced resources available to the Ukrainian war effort, and it has undermined allied countries' reputation and standing by making European countries complicit in war crimes and violations of international law.  It has also hurt European economies and residents.  You have a choice about which planes you let in.  Use your judgment.",
+        "title": "What about Ukraine?"
+      }
+    ]
+  },
+  "message": "European countries have a choice about when US military planes enter their airspace, and on what missions. The current war against Iran is hurting your own people. You can condition your cooperation. Can you stop this war?",
+  "templates": {
+    "headline_intro": "If {name} had refused, it could have affected {{acft}}% of aircraft{{flights_and_landings}}.",
+    "headline_outro": "",
+    "closing": "Can you stop this war?"
+  },
+  "title": "Flyover Country",
+  "tldr": {
+    "_doc": "Intro screen shown before the guided tour (tour.js). Plain text only; omit the key to skip the screen.",
+    "title": "Flyover Country",
+    "lead": [
+      "This data journalism tool for bulk processing radio data about US military flights over Europe was made during the months of the US-Israeli war on Iran.",
+      "It includes an interactive map to explore detailed information about several European countries."
+    ],
+    "list_intro": "It may help residents of those countries, including activists, journalists and politicians, discover which",
+    "bullets": [
+      "US military flights transited their country's airspace in the first ~50 days of the war",
+      "cooperation or pushback by their national government did and did not occur",
+      "types of aircraft these were and where they may have landed",
+      "legal mechanisms are available to selectively refuse overflight (without requiring legislative or treaty changes)",
+      "routes could be constrained through the decision of individual countries (without agreement on the European level)",
+      "impact their country could have had alone, if it successfully said 'no'"
+    ],
+    "after": [
+      "Software engineers can fork the open source code to verify the findings, explore other dates and locations, and improve the methodology."
+    ],
+    "disclaimer": "The tool is for use in investigating matters of public policy and historical interest, and comes without warranties of any kind.",
+    "button": "Take the tour"
+  }
+}

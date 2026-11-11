@@ -1,0 +1,10 @@
+{
+  "_doc": "Manual icao24 -> type_code corrections, applied as the final step of backend.pipeline.etl.preprocess.types.resolve_types() (after all layered bulk-source/daily-records resolution), overriding whatever those layers produced. Each entry exists because independently-verified, out-of-band evidence (cited per entry, not just a hunch) showed the type_code a bulk source assigned to these icao24s is wrong -- never applied speculatively. This file is deliberately narrow: it is NOT a general typecode/desc-disagreement resolver (see the disagreement check in types.py, which logs but never auto-resolves) -- only specific, evidenced corrections belong here.",
+  "overrides": [
+    {
+      "icao24s": ["ae63cf", "ae63d0", "ae63d2", "ae63d3", "ae63d4", "ae63d5", "ae63d6"],
+      "type_code": "B762",
+      "evidence": "mictronics (the bulk source these 7 hexes' type_code came from) reports type_code=T38 (Northrop T-38 Talon, a supersonic trainer with ~1,000 nm ferry range), but every one of these 7 hexes has desc='BOEING 767-200' from live in-crop daily-records ADS-B -- the same desc 26 other, correctly-typed B762 hexes in this corpus also carry. Decisive: ae63d0 flew EGUN (RAF Mildenhall) -> KSUU (Travis AFB), 4,593 nm, which is physically impossible for a T-38 and unremarkable for a 767-200. The desc is trusted; the mictronics typecode is treated as wrong for this hex family (stale registry entry, hex reassignment, or upstream data error -- root cause not established). Effect: roles_of_desc(B762, 'BOEING 767-200') matches B762's own 'civil_cargo' desc_roles pattern (not 'KC-46', which these descs don't mention), so these aircraft classify as civil_cargo rather than trainer_advanced."
+    }
+  ]
+}

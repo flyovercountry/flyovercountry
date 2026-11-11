@@ -1,0 +1,8 @@
+# frame-ancestors * (in the Content-Security-Policy below) is intentional,
+# not an oversight: the Embed menu item lets anyone iframe this site
+# elsewhere by design. Do not tighten this to 'self' or a host allowlist.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), camera=(), microphone=(), usb=(), payment=(), interest-cohort=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://unpkg.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' https://*.basemaps.cartocdn.com data: blob:; connect-src 'self' https://*.basemaps.cartocdn.com https://cloudflareinsights.com; worker-src blob:; frame-ancestors *

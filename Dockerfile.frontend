@@ -1,0 +1,17 @@
+FROM node:22-alpine
+WORKDIR /app
+# Unprivileged runtime user at the host user's uid/gid (README, Container
+# users), replacing the image's node user; it owns /app so the entrypoint
+# can run npm ci.
+ARG DOCKER_UID=1000
+ARG DOCKER_GID=1000
+RUN deluser node && addgroup -g ${DOCKER_GID} docker \
+    && adduser -D -u ${DOCKER_UID} -G docker docker \
+    && chown -R docker:docker /app
+COPY --chown=docker:docker package.json package-lock.json ./
+USER docker
+RUN npm ci --ignore-scripts
+COPY --chown=docker:docker frontend/serve.mjs frontend/serve.mjs
+COPY --chown=docker:docker frontend/entrypoint.sh frontend/entrypoint.sh
+EXPOSE 8150
+CMD ["frontend/entrypoint.sh"]

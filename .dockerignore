@@ -1,0 +1,18 @@
+# Build context for every image in docker-compose.yml uses `context: .`
+# (the repo root), so this one file applies to all of them. Verified
+# against every Dockerfile's COPY lines: none reference any path below,
+# so excluding them only shrinks the context sent to the daemon — it
+# does not change what ends up in an image.
+data/
+node_modules/
+test-results/
+.git/
+*.log
+
+# Python/tooling caches — never referenced by a COPY, just local cruft.
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/

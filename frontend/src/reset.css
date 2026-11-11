@@ -1,0 +1,8 @@
+/* The app's own minimal reset. Imported from tailwind.css with
+ * `layer(base)` — Tailwind's mechanism for layering a stylesheet (it is how
+ * preflight is layered). It must sit in the `base` layer: an UNLAYERED
+ * universal `padding: 0` would beat every layered padding and margin
+ * utility regardless of specificity.
+ * (Note to editors: never write the character pair star-slash inside this
+ * comment — it ends the comment and silently drops the rule below.) */
+* { margin: 0; padding: 0; box-sizing: border-box; }

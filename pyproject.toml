@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fly"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "click>=8.1",
+    "numpy>=1.24",
+    "orjson>=3.9",
+    "pandas>=2.0",
+    "pyarrow>=14.0",
+    "scikit-learn>=1.3",
+]
+
+[project.optional-dependencies]
+geo = [
+    "shapely>=2.0",
+    "pyshp>=2.3",
+    "rasterio>=1.3",
+    "scipy>=1.11",
+]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.4",
+]
+
+[project.scripts]
+fly = "backend.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["backend*"]
+
+[tool.ruff]
+line-length = 99
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["test/backend"]
+# Deliberately no test/backend/__init__.py: with one present, pytest
+# imports the directory as top-level package "backend", colliding with
+# (and shadowing) the real backend/ package at the repo root, so every
+# `from backend...` import in the suite breaks. Keeping test/backend
+# package-less makes pytest insert its own directory on sys.path per
+# test file instead, and pythonpath below adds the repo root so
+# `backend` still resolves, on host or in the container alike.
+pythonpath = ["."]
